@@ -266,39 +266,28 @@ namespace EffectiveAreas {
 //
 // constructors and destructor
 //
-TreeWriter::TreeWriter(const edm::ParameterSet& iConfig):
-   vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices"))),
-   photonCollectionToken_(consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons"))),
-   rhoToken_(consumes<double> (iConfig.getParameter<edm::InputTag>("rho"))),
-   prunedGenToken_(consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles"))),
+TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
+   : vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
+   , photonCollectionToken_(consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
+   , rhoToken_(consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
+   , prunedGenToken_(consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
    // Cluster shapes
-   full5x5SigmaIEtaIEtaMapToken_(consumes <edm::ValueMap<float> >
-				 (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIEtaMap"))),
-   full5x5SigmaIEtaIPhiMapToken_(consumes <edm::ValueMap<float> >
-				 (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIPhiMap"))),
-   full5x5E1x3MapToken_(consumes <edm::ValueMap<float> >
-			(iConfig.getParameter<edm::InputTag>("full5x5E1x3Map"))),
-   full5x5E2x2MapToken_(consumes <edm::ValueMap<float> >
-			(iConfig.getParameter<edm::InputTag>("full5x5E2x2Map"))),
-   full5x5E2x5MaxMapToken_(consumes <edm::ValueMap<float> >
-			   (iConfig.getParameter<edm::InputTag>("full5x5E2x5MaxMap"))),
-   full5x5E5x5MapToken_(consumes <edm::ValueMap<float> >
-			(iConfig.getParameter<edm::InputTag>("full5x5E5x5Map"))),
-   esEffSigmaRRMapToken_(consumes <edm::ValueMap<float> >
-			 (iConfig.getParameter<edm::InputTag>("esEffSigmaRRMap"))),
+   , full5x5SigmaIEtaIEtaMapToken_(consumes <edm::ValueMap<float> > (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIEtaMap")))
+   , full5x5SigmaIEtaIPhiMapToken_(consumes <edm::ValueMap<float> > (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIPhiMap")))
+   , full5x5E1x3MapToken_(consumes <edm::ValueMap<float> >          (iConfig.getParameter<edm::InputTag>("full5x5E1x3Map")))
+   , full5x5E2x2MapToken_(consumes <edm::ValueMap<float> >          (iConfig.getParameter<edm::InputTag>("full5x5E2x2Map")))
+   , full5x5E2x5MaxMapToken_(consumes <edm::ValueMap<float> >       (iConfig.getParameter<edm::InputTag>("full5x5E2x5MaxMap")))
+   , full5x5E5x5MapToken_(consumes <edm::ValueMap<float> >          (iConfig.getParameter<edm::InputTag>("full5x5E5x5Map")))
+   , esEffSigmaRRMapToken_(consumes <edm::ValueMap<float> >         (iConfig.getParameter<edm::InputTag>("esEffSigmaRRMap")))
    // Isolations
-   phoChargedIsolationToken_(consumes <edm::ValueMap<float> >
-			     (iConfig.getParameter<edm::InputTag>("phoChargedIsolation"))),
-   phoNeutralHadronIsolationToken_(consumes <edm::ValueMap<float> >
-				   (iConfig.getParameter<edm::InputTag>("phoNeutralHadronIsolation"))),
-   phoPhotonIsolationToken_(consumes <edm::ValueMap<float> >
-			    (iConfig.getParameter<edm::InputTag>("phoPhotonIsolation"))),
-   phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >
-				  (iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
+   , phoChargedIsolationToken_(consumes <edm::ValueMap<float> >     (iConfig.getParameter<edm::InputTag>("phoChargedIsolation")))
+   , phoNeutralHadronIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoNeutralHadronIsolation")))
+   , phoPhotonIsolationToken_(consumes <edm::ValueMap<float> >      (iConfig.getParameter<edm::InputTag>("phoPhotonIsolation")))
+   , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
 {
 
    edm::Service<TFileService> fs;
-   photonTree_ = fs->make<TTree> ("PhotonTree", "Photon data");
+   photonTree_ = fs->make<TTree> ("eventTree", "Photon data");
   
    photonTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
    photonTree_->Branch("rho"        ,  &rho_ , "rho/F");
@@ -345,7 +334,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig):
    photonTree_->Branch("isMedium", &isMedium_);
    photonTree_->Branch("isTight" , &isTight_);
 
- 
+
    //
    // Create and configure barrel MVA
    //
@@ -545,6 +534,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    mvaValue_.clear();
    isTrue_.clear();
    isTrueAlternative_.clear();
+   isLoose_.clear();
+   isMedium_.clear();
+   isTight_.clear();
 
    // Loop over photons
   
@@ -707,6 +699,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    // Save the info
    photonTree_->Fill();
+   jetTree_->Fill();
 
 }
 
