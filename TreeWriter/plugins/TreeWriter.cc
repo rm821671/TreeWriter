@@ -49,6 +49,8 @@
 #include "Math/VectorUtil.h"
 
 
+// Workinig point definitions
+
 const int nWP = 3;
 enum WpType { WP_LOOSE = 0,
 	      WP_MEDIUM,
@@ -394,7 +396,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			      isoNeutralHadronsWithEA_.back(),
 			      isoPhotonsWithEA_.back());
       isMedium_.push_back(passWP);
-      passPW= passWorkingPoint( WP_TIGHT, isBarrel, pt_.back(),
+      passWP= passWorkingPoint( WP_TIGHT, isBarrel, pt_.back(),
 			      hOverE_.back(),
 			      full5x5_sigmaIetaIeta_.back(),
 			      isoChargedHadronsWithEA_.back(),
