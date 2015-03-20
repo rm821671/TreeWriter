@@ -88,7 +88,7 @@ bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
 		      float chIso, float nhIso, float phIso)
 {
    int ieta = 0;
-   if( !isBarrel )      ieta = 1;
+   if( !isBarrel ) ieta = 1;
    bool result = 1
       && hOverE < hOverECut[ieta][iwp]
       && full5x5_sigmaIetaIeta > 0 // in case miniAOD sets this to zero due to pre-selection of storage
@@ -97,9 +97,15 @@ bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
       && nhIso < nhIso_A[ieta][iwp] + pt * nhIso_B[ieta][iwp]
       && phIso < phIso_A[ieta][iwp] + pt * phIso_B[ieta][iwp] ;
 
-return result;
+   return result;
 }
-
+bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
+{
+   bool isBarrel = fabs(pho.p.Eta()) < 1.479;
+   return passWorkingPoint(iwp, isBarrel, pho.p.Pt(),
+			   pho.hOverE, pho.full5x5_sigmaIetaIeta,
+			   pho.isoChargedHadronsWithEA, pho.isoNeutralHadronsWithEA, pho.isoPhotonsWithEA);
+}
 
 
 //
@@ -163,50 +169,18 @@ private:
 
    // all photon variables
    std::vector<tree::Photon> photons_;
-   std::vector<TVector3> vector3_;
    Int_t nPhotons_;
-
-   std::vector<Float_t> pt_;
-   std::vector<Float_t> eta_;
-   std::vector<Float_t> phi_;
 
    // Variables for cut based ID
    std::vector<Float_t> full5x5_sigmaIetaIeta_;
-   std::vector<Float_t> hOverE_;
-   std::vector<Int_t> hasPixelSeed_;
-   std::vector<Int_t> passElectronVeto_;
-
-   std::vector<Float_t> isoChargedHadrons_;
-   std::vector<Float_t> isoNeutralHadrons_;
-   std::vector<Float_t> isoPhotons_;
-
-   std::vector<Float_t> isoChargedHadronsWithEA_;
-   std::vector<Float_t> isoNeutralHadronsWithEA_;
-   std::vector<Float_t> isoPhotonsWithEA_;
 
    // Extra variables for MVA ID (excluding already mentioned above)
    std::vector<Float_t> scRawEnergy_;
-   std::vector<Float_t> isoWorstChargedHadrons_;
    std::vector<Float_t> r9_;
-   std::vector<Float_t> full5x5_sigmaIetaIphi_;
-   std::vector<Float_t> full5x5_e1x3_;
-   std::vector<Float_t> full5x5_e2x2_;
-   std::vector<Float_t> full5x5_e2x5Max_;
-   std::vector<Float_t> full5x5_e5x5_;
    std::vector<Float_t> sigma_eta_;
    std::vector<Float_t> sigma_phi_;
    std::vector<Float_t> esEffSigmaRR_;
    std::vector<Float_t> esEnergy_;
-
-   std::vector<Float_t> mvaValue_;
-  
-   std::vector<Int_t> isTrue_;
-   std::vector<Int_t> isTrueAlternative_;
-
-   std::vector<Bool_t>  isLoose_;
-   std::vector<Bool_t>  isMedium_;
-   std::vector<Bool_t>  isTight_;
-
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
@@ -299,47 +273,11 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    photonTree_->Branch("rho"        ,  &rho_ , "rho/F");
    photonTree_->Branch("nPho",  &nPhotons_ , "nPho/I");
 
-   photonTree_->Branch("pt"           ,  &pt_    );
-   photonTree_->Branch("scRawEnergy"  ,  &scRawEnergy_    );
-   photonTree_->Branch("esEnergy"     , &esEnergy_);
-   photonTree_->Branch("eta"          ,  &eta_ );
-   photonTree_->Branch("phi"          ,  &phi_ );
-
-   photonTree_->Branch("hasPixelSeed"           ,  &hasPixelSeed_);
-   photonTree_->Branch("passElectronVeto"       ,  &passElectronVeto_);
-   photonTree_->Branch("hOverE"                 ,  &hOverE_);
-
    // Cluster shapes
    photonTree_->Branch("r9"  , &r9_);
-   photonTree_->Branch("full5x5_sigmaIetaIeta"  , &full5x5_sigmaIetaIeta_);
-   photonTree_->Branch("full5x5_sigmaIetaIphi"  , &full5x5_sigmaIetaIphi_);
-   photonTree_->Branch("full5x5_e1x3"   , &full5x5_e1x3_);
-   photonTree_->Branch("full5x5_e2x2"   , &full5x5_e2x2_);
-   photonTree_->Branch("full5x5_e2x5Max", &full5x5_e2x5Max_);
-   photonTree_->Branch("full5x5_e5x5"   , &full5x5_e5x5_);
    photonTree_->Branch("sigma_eta"      , &sigma_eta_);
    photonTree_->Branch("sigma_phi"      , &sigma_phi_);
    photonTree_->Branch("esEffSigmaRR"  , &esEffSigmaRR_);
-
-   // Isolations
-   photonTree_->Branch("isoChargedHadrons"      , &isoChargedHadrons_);
-   photonTree_->Branch("isoNeutralHadrons"      , &isoNeutralHadrons_);
-   photonTree_->Branch("isoPhotons"             , &isoPhotons_);
-   photonTree_->Branch("isoWorstChargedHadrons" , &isoWorstChargedHadrons_);
-
-   photonTree_->Branch("isoChargedHadronsWithEA"      , &isoChargedHadronsWithEA_);
-   photonTree_->Branch("isoNeutralHadronsWithEA"      , &isoNeutralHadronsWithEA_);
-   photonTree_->Branch("isoPhotonsWithEA"             , &isoPhotonsWithEA_);
-
-   photonTree_->Branch("mvaValue"           , &mvaValue_);
-
-   photonTree_->Branch("isTrue"             , &isTrue_);
-   photonTree_->Branch("isTrueAlternative"  , &isTrueAlternative_);
-
-   photonTree_->Branch("isLoose" , &isLoose_ );
-   photonTree_->Branch("isMedium", &isMedium_);
-   photonTree_->Branch("isTight" , &isTight_);
-
 
    //
    // Create and configure barrel MVA
@@ -513,38 +451,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Clear vectors
    nPhotons_ = 0;
    photons_.clear();
-   vector3_.clear();
-   pt_.clear();
-   eta_.clear();
-   phi_.clear();
-   full5x5_sigmaIetaIeta_.clear();
-   hOverE_.clear();
-   hasPixelSeed_.clear();
-   passElectronVeto_.clear();
-   isoChargedHadrons_.clear();
-   isoNeutralHadrons_.clear();
-   isoPhotons_.clear();
-   isoChargedHadronsWithEA_.clear();
-   isoNeutralHadronsWithEA_.clear();
-   isoPhotonsWithEA_.clear();
+
    scRawEnergy_.clear();
-   isoWorstChargedHadrons_.clear();
    r9_.clear();
-   full5x5_sigmaIetaIphi_.clear();
-   full5x5_e1x3_.clear();
-   full5x5_e2x2_.clear();
-   full5x5_e2x5Max_.clear();
-   full5x5_e5x5_.clear();
    sigma_eta_.clear();
    sigma_phi_.clear();
    esEffSigmaRR_.clear();
    esEnergy_.clear();
-   mvaValue_.clear();
-   isTrue_.clear();
-   isTrueAlternative_.clear();
-   isLoose_.clear();
-   isMedium_.clear();
-   isTight_.clear();
 
    // photon loop
    tree::Photon trPho;
@@ -556,50 +469,46 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 continue;
     
       nPhotons_++;
-      pt_          .push_back( pho->pt() );
-      trPho.pt=pho->pt();
-      scRawEnergy_ .push_back( pho->superCluster()->rawEnergy() );
-      esEnergy_    .push_back( pho->superCluster()->preshowerEnergy() );
-      eta_         .push_back( pho->superCluster()->eta() );
-      phi_         .push_back( pho->superCluster()->phi() );
+      trPho.p.SetPtEtaPhi(pho->pt(),pho->superCluster()->eta(),pho->superCluster()->phi());
+      trPho.scRawEnergy = pho->superCluster()->rawEnergy();
+      trPho.esEnergy    = pho->superCluster()->preshowerEnergy();
 
-      //const edm::Ptr<pat::Photon> phoPtr( pho );
       const edm::Ptr<pat::Photon> phoPtr( collection, pho - collection->begin() );
 
-      hOverE_                .push_back( pho->hadTowOverEm() );
-      hasPixelSeed_          .push_back( (Int_t)pho->hasPixelSeed() );
+      trPho.hOverE=pho->hadTowOverEm() ;
+      trPho.hasPixelSeed=(Int_t)pho->hasPixelSeed() ;
+      trPho.passElectronVeto= pho->passElectronVeto() ;
 
-      passElectronVeto_      .push_back( pho->passElectronVeto() );
+      trPho.sigma_eta             = pho->superCluster()->etaWidth();
+      trPho.sigma_phi             = pho->superCluster()->phiWidth();
+      trPho.r9                    = pho->r9();
+      trPho.full5x5_sigmaIetaIeta = (*full5x5SigmaIEtaIEtaMap)[ phoPtr ];
+      trPho.full5x5_sigmaIetaIphi = (*full5x5SigmaIEtaIPhiMap)[ phoPtr ];
 
-      sigma_eta_             .push_back( pho->superCluster()->etaWidth() );
-      sigma_phi_             .push_back( pho->superCluster()->phiWidth() );
-      r9_                    .push_back( pho->r9() );
-      full5x5_sigmaIetaIeta_ .push_back( (*full5x5SigmaIEtaIEtaMap)[ phoPtr ] );
-      full5x5_sigmaIetaIphi_ .push_back( (*full5x5SigmaIEtaIPhiMap)[ phoPtr ] );
+      trPho.full5x5_e1x3    = (*full5x5E1x3Map)[ phoPtr ];
+      trPho.full5x5_e2x2    = (*full5x5E2x2Map)[ phoPtr ];
+      trPho.full5x5_e2x5Max = (*full5x5E2x5MaxMap)[ phoPtr ];
+      trPho.full5x5_e5x5    = (*full5x5E5x5Map)[ phoPtr ];
+      trPho.esEffSigmaRR    = (*esEffSigmaRRMap)[ phoPtr ];
 
-      full5x5_e1x3_    .push_back( (*full5x5E1x3Map)[ phoPtr ] );
-      full5x5_e2x2_    .push_back( (*full5x5E2x2Map)[ phoPtr ] );
-      full5x5_e2x5Max_ .push_back( (*full5x5E2x5MaxMap)[ phoPtr ] );
-      full5x5_e5x5_    .push_back( (*full5x5E5x5Map)[ phoPtr ] );
-      esEffSigmaRR_    .push_back( (*esEffSigmaRRMap)[ phoPtr ] );
-
-      isoChargedHadrons_ .push_back( (*phoChargedIsolationMap)[phoPtr] );
-      isoNeutralHadrons_ .push_back( (*phoNeutralHadronIsolationMap)[phoPtr] );
-      isoPhotons_        .push_back( (*phoPhotonIsolationMap)[phoPtr] );
-      isoWorstChargedHadrons_ .push_back( (*phoWorstChargedIsolationMap)[phoPtr] );
+      trPho.isoChargedHadrons = (*phoChargedIsolationMap)[phoPtr];
+      trPho.isoNeutralHadrons = (*phoNeutralHadronIsolationMap)[phoPtr];
+      trPho.isoPhotons        = (*phoPhotonIsolationMap)[phoPtr];
+      trPho.isoWorstChargedHadrons = (*phoWorstChargedIsolationMap)[phoPtr];
 
       // Compute isolation with effective area correction for PU
       // Find eta bin first. If eta>2.5, the last eta bin is used.
       int etaBin = 0; 
       while ( etaBin < EffectiveAreas::nEtaBins-1 
-	      && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] )
-      { ++etaBin; };
-      isoPhotonsWithEA_        .push_back( std::max( (float)0.0, (*phoPhotonIsolationMap)       [phoPtr] 
-						     - rho_ * EffectiveAreas::areaPhotons[etaBin] ) );
-      isoNeutralHadronsWithEA_ .push_back( std::max( (float)0.0, (*phoNeutralHadronIsolationMap)[phoPtr] 
-						     - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] ) );
-      isoChargedHadronsWithEA_ .push_back( std::max( (float)0.0, (*phoChargedIsolationMap)      [phoPtr] 
-						     - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] ) );
+	      && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
+	 ++etaBin; 
+      };
+      trPho.isoPhotonsWithEA        = std::max( (float)0.0, (*phoPhotonIsolationMap)       [phoPtr] 
+						     - rho_ * EffectiveAreas::areaPhotons[etaBin] );
+      trPho.isoNeutralHadronsWithEA = std::max( (float)0.0, (*phoNeutralHadronIsolationMap)[phoPtr] 
+						     - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
+      trPho.isoChargedHadronsWithEA = std::max( (float)0.0, (*phoChargedIsolationMap)      [phoPtr] 
+						     - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
 
       // Prepare variables and find the MVA value
       varPhi_          = pho->phi();
@@ -664,44 +573,26 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //
       if( e5x5 != 0 ){
 	 if( abs( pho->superCluster()->eta() ) < 1.479 )
-	    mvaValue_ .push_back( tmvaReader_[0]->EvaluateMVA(methodName_[0]) );
+	    trPho.mvaValue=tmvaReader_[0]->EvaluateMVA(methodName_[0]);
 	 else
-	    mvaValue_ .push_back( tmvaReader_[1]->EvaluateMVA(methodName_[1]) );
+	    trPho.mvaValue=tmvaReader_[1]->EvaluateMVA(methodName_[1]);
       }else{
 	 // e5x5 zero means that this photon's info hasn't been stored fully in
 	 // miniAOD since it is a poor quality photon. We can't run MVA on it.
-	 mvaValue_.push_back( -999. );
+	 trPho.mvaValue= -999. ;
       }
 
       // MC match
-      isTrue_.push_back( matchToTruth(*pho, prunedGenParticles) );
-      isTrueAlternative_.push_back( matchToTruthAlternative(*pho, prunedGenParticles) );
-      // check working photon working points
-      bool isBarrel = (fabs(eta_.back()) < 1.479);
-      bool passWP;
-      passWP= passWorkingPoint( WP_LOOSE, isBarrel, pt_.back(),
-			      hOverE_.back(),
-			      full5x5_sigmaIetaIeta_.back(),
-			      isoChargedHadronsWithEA_.back(),
-			      isoNeutralHadronsWithEA_.back(),
-			      isoPhotonsWithEA_.back());
-      isLoose_.push_back(passWP);
-      passWP= passWorkingPoint( WP_MEDIUM, isBarrel, pt_.back(),
-			      hOverE_.back(),
-			      full5x5_sigmaIetaIeta_.back(),
-			      isoChargedHadronsWithEA_.back(),
-			      isoNeutralHadronsWithEA_.back(),
-			      isoPhotonsWithEA_.back());
-      isMedium_.push_back(passWP);
-      passWP= passWorkingPoint( WP_TIGHT, isBarrel, pt_.back(),
-			      hOverE_.back(),
-			      full5x5_sigmaIetaIeta_.back(),
-			      isoChargedHadronsWithEA_.back(),
-			      isoNeutralHadronsWithEA_.back(),
-			      isoPhotonsWithEA_.back());
-      isTight_.push_back(passWP);
+      trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
+      trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
 
-   
+      // check working photon working points
+
+      trPho.isLoose = passWorkingPoint( WP_LOOSE , trPho);
+      trPho.isMedium= passWorkingPoint( WP_MEDIUM, trPho);
+      trPho.isTight = passWorkingPoint( WP_TIGHT , trPho);
+  
+
       photons_.push_back(trPho);
    } // photon loop
    
