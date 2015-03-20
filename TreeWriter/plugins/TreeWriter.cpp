@@ -161,26 +161,14 @@ private:
    edm::EDGetTokenT<edm::ValueMap<float> > phoPhotonIsolationToken_; 
    edm::EDGetTokenT<edm::ValueMap<float> > phoWorstChargedIsolationToken_; 
 
-   TTree *photonTree_;
+   TTree *eventTree_;
 
    Int_t nPV_;        // number of reconsrtucted primary vertices
    Float_t rho_;      // the rho variable
 
 
-   // all photon variables
+   // all photon variables contained in own object
    std::vector<tree::Photon> photons_;
-   Int_t nPhotons_;
-
-   // Variables for cut based ID
-   std::vector<Float_t> full5x5_sigmaIetaIeta_;
-
-   // Extra variables for MVA ID (excluding already mentioned above)
-   std::vector<Float_t> scRawEnergy_;
-   std::vector<Float_t> r9_;
-   std::vector<Float_t> sigma_eta_;
-   std::vector<Float_t> sigma_phi_;
-   std::vector<Float_t> esEffSigmaRR_;
-   std::vector<Float_t> esEnergy_;
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
@@ -264,20 +252,13 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 {
 
    edm::Service<TFileService> fs;
-   photonTree_ = fs->make<TTree> ("eventTree", "Photon data");
+   eventTree_ = fs->make<TTree> ("eventTree", "event data");
 
-   photonTree_->Branch("photons", &photons_);
-   // photonTree_->Branch("vec3", &vector3_);
+   eventTree_->Branch("photons", &photons_);
+   // eventTree_->Branch("vec3", &vector3_);
   
-   photonTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
-   photonTree_->Branch("rho"        ,  &rho_ , "rho/F");
-   photonTree_->Branch("nPho",  &nPhotons_ , "nPho/I");
-
-   // Cluster shapes
-   photonTree_->Branch("r9"  , &r9_);
-   photonTree_->Branch("sigma_eta"      , &sigma_eta_);
-   photonTree_->Branch("sigma_phi"      , &sigma_phi_);
-   photonTree_->Branch("esEffSigmaRR"  , &esEffSigmaRR_);
+   eventTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
+   eventTree_->Branch("rho"        ,  &rho_ , "rho/F");
 
    //
    // Create and configure barrel MVA
@@ -449,15 +430,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
    // Clear vectors
-   nPhotons_ = 0;
    photons_.clear();
-
-   scRawEnergy_.clear();
-   r9_.clear();
-   sigma_eta_.clear();
-   sigma_phi_.clear();
-   esEffSigmaRR_.clear();
-   esEnergy_.clear();
 
    // photon loop
    tree::Photon trPho;
@@ -468,7 +441,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if( pho->pt() < 15 ) 
 	 continue;
     
-      nPhotons_++;
       trPho.p.SetPtEtaPhi(pho->pt(),pho->superCluster()->eta(),pho->superCluster()->phi());
       trPho.scRawEnergy = pho->superCluster()->rawEnergy();
       trPho.esEnergy    = pho->superCluster()->preshowerEnergy();
@@ -591,13 +563,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isLoose = passWorkingPoint( WP_LOOSE , trPho);
       trPho.isMedium= passWorkingPoint( WP_MEDIUM, trPho);
       trPho.isTight = passWorkingPoint( WP_TIGHT , trPho);
-  
 
+      // write the photon to collection
       photons_.push_back(trPho);
    } // photon loop
    
-   // Save the info
-   photonTree_->Fill();
+   // write the event
+   eventTree_->Fill();
 }
 
 
