@@ -105,10 +105,10 @@ return result;
 // class declaration
 //
 
-class PhotonNtuplerMVADemoMiniAOD : public edm::EDAnalyzer {
+class TreeWriter : public edm::EDAnalyzer {
 public:
-   explicit PhotonNtuplerMVADemoMiniAOD(const edm::ParameterSet&);
-   ~PhotonNtuplerMVADemoMiniAOD();
+   explicit TreeWriter(const edm::ParameterSet&);
+   ~TreeWriter();
 
    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -266,7 +266,7 @@ namespace EffectiveAreas {
 //
 // constructors and destructor
 //
-PhotonNtuplerMVADemoMiniAOD::PhotonNtuplerMVADemoMiniAOD(const edm::ParameterSet& iConfig):
+TreeWriter::TreeWriter(const edm::ParameterSet& iConfig):
    vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices"))),
    photonCollectionToken_(consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons"))),
    rhoToken_(consumes<double> (iConfig.getParameter<edm::InputTag>("rho"))),
@@ -417,7 +417,7 @@ PhotonNtuplerMVADemoMiniAOD::PhotonNtuplerMVADemoMiniAOD(const edm::ParameterSet
 }
 
 
-PhotonNtuplerMVADemoMiniAOD::~PhotonNtuplerMVADemoMiniAOD()
+TreeWriter::~TreeWriter()
 {
  
    // do anything here that needs to be done at desctruction time
@@ -435,7 +435,7 @@ PhotonNtuplerMVADemoMiniAOD::~PhotonNtuplerMVADemoMiniAOD()
 
 // ------------ method called for each event  ------------
 void
-PhotonNtuplerMVADemoMiniAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace std;
    using namespace edm;
@@ -713,20 +713,20 @@ PhotonNtuplerMVADemoMiniAOD::analyze(const edm::Event& iEvent, const edm::EventS
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-PhotonNtuplerMVADemoMiniAOD::beginJob()
+TreeWriter::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-PhotonNtuplerMVADemoMiniAOD::endJob() 
+TreeWriter::endJob() 
 {
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
   void 
-  PhotonNtuplerMVADemoMiniAOD::beginRun(edm::Run const&, edm::EventSetup const&)
+  TreeWriter::beginRun(edm::Run const&, edm::EventSetup const&)
   {
   }
 */
@@ -734,7 +734,7 @@ PhotonNtuplerMVADemoMiniAOD::endJob()
 // ------------ method called when ending the processing of a run  ------------
 /*
   void 
-  PhotonNtuplerMVADemoMiniAOD::endRun(edm::Run const&, edm::EventSetup const&)
+  TreeWriter::endRun(edm::Run const&, edm::EventSetup const&)
   {
   }
 */
@@ -742,7 +742,7 @@ PhotonNtuplerMVADemoMiniAOD::endJob()
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
   void 
-  PhotonNtuplerMVADemoMiniAOD::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+  TreeWriter::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
   {
   }
 */
@@ -750,14 +750,14 @@ PhotonNtuplerMVADemoMiniAOD::endJob()
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
   void 
-  PhotonNtuplerMVADemoMiniAOD::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+  TreeWriter::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
   {
   }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-PhotonNtuplerMVADemoMiniAOD::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+TreeWriter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
    //The following says we do not know what parameters are allowed so do no validation
    // Please change this to state exactly what you do use, even if it is no parameters
    edm::ParameterSetDescription desc;
@@ -765,7 +765,7 @@ PhotonNtuplerMVADemoMiniAOD::fillDescriptions(edm::ConfigurationDescriptions& de
    descriptions.addDefault(desc);
 }
 
-int PhotonNtuplerMVADemoMiniAOD::matchToTruth(const pat::Photon &pho, 
+int TreeWriter::matchToTruth(const pat::Photon &pho, 
 					      const edm::Handle<edm::View<reco::GenParticle>>  
 					      &genParticles)
 {
@@ -814,11 +814,11 @@ int PhotonNtuplerMVADemoMiniAOD::matchToTruth(const pat::Photon &pho,
    
 }
 
-void PhotonNtuplerMVADemoMiniAOD::findFirstNonPhotonMother(const reco::Candidate *particle,
+void TreeWriter::findFirstNonPhotonMother(const reco::Candidate *particle,
 							   int &ancestorPID, int &ancestorStatus){
   
    if( particle == 0 ){
-      printf("PhotonNtuplerMVADemoMiniAOD: ERROR! null candidate pointer, this should never happen\n");
+      printf("TreeWriter: ERROR! null candidate pointer, this should never happen\n");
       return;
    }
 
@@ -834,7 +834,7 @@ void PhotonNtuplerMVADemoMiniAOD::findFirstNonPhotonMother(const reco::Candidate
    return;
 }
 
-int PhotonNtuplerMVADemoMiniAOD::matchToTruthAlternative(const pat::Photon &pho, 
+int TreeWriter::matchToTruthAlternative(const pat::Photon &pho, 
 							 const edm::Handle<edm::View<reco::GenParticle>>  
 							 &genParticles)
 {
@@ -868,4 +868,4 @@ int PhotonNtuplerMVADemoMiniAOD::matchToTruthAlternative(const pat::Photon &pho,
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PhotonNtuplerMVADemoMiniAOD);
+DEFINE_FWK_MODULE(TreeWriter);
