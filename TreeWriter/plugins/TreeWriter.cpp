@@ -52,6 +52,7 @@
 #include "Math/VectorUtil.h"
 #include "TMath.h"
 
+#include "TreeParticles.hpp"
 
 // Workinig point definitions
 
@@ -161,6 +162,8 @@ private:
 
 
    // all photon variables
+   std::vector<tree::Photon> photons_;
+   std::vector<TVector3> vector3_;
    Int_t nPhotons_;
 
    std::vector<Float_t> pt_;
@@ -288,6 +291,9 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
    edm::Service<TFileService> fs;
    photonTree_ = fs->make<TTree> ("eventTree", "Photon data");
+
+   photonTree_->Branch("photons", &photons_);
+   // photonTree_->Branch("vec3", &vector3_);
   
    photonTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
    photonTree_->Branch("rho"        ,  &rho_ , "rho/F");
@@ -506,6 +512,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // Clear vectors
    nPhotons_ = 0;
+   photons_.clear();
+   vector3_.clear();
    pt_.clear();
    eta_.clear();
    phi_.clear();
@@ -538,12 +546,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    isMedium_.clear();
    isTight_.clear();
 
-   // Loop over photons
-  
-   // const auto& pho_refs = collection->refVector();
-  
-   // for( const auto& pho : pho_refs ) {
-
+   // photon loop
+   tree::Photon trPho;
    for( View<pat::Photon>::const_iterator pho = collection->begin();
 	pho != collection->end(); pho++){
     
@@ -553,6 +557,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
       nPhotons_++;
       pt_          .push_back( pho->pt() );
+      trPho.pt=pho->pt();
       scRawEnergy_ .push_back( pho->superCluster()->rawEnergy() );
       esEnergy_    .push_back( pho->superCluster()->preshowerEnergy() );
       eta_         .push_back( pho->superCluster()->eta() );
@@ -695,12 +700,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			      isoNeutralHadronsWithEA_.back(),
 			      isoPhotonsWithEA_.back());
       isTight_.push_back(passWP);
+
+   
+      photons_.push_back(trPho);
    } // photon loop
    
    // Save the info
    photonTree_->Fill();
-   jetTree_->Fill();
-
 }
 
 
