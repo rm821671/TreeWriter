@@ -547,32 +547,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       varPt_ = pho->pt(); 
       varEta_ = pho->eta();
 
-      // DEBUG
-      const bool debug = false;
-      if( debug && fabs( pho->superCluster()->eta())<1.479 ){
-	 printf("Printout of barrel electron variables for MVA:\n");
-	 printf("  varPhi_           %f\n", varPhi_         );
-	 printf("  varR9_            %f\n", varR9_          ); 
-	 printf("  varSieie_         %f\n", varSieie_       );
-	 printf("  varSieip_         %f\n", varSieip_       ); 
-	 printf("  varE1x3overE5x5_  %f\n", varE1x3overE5x5_); 
-	 printf("  varE2x2overE5x5_  %f\n", varE2x2overE5x5_); 
-	 printf("  varE2x5overE5x5_  %f\n", varE2x5overE5x5_); 
-	 printf("  varSCEta_         %f\n", varSCEta_       ); 
-	 printf("  varRawE_          %f\n", varRawE_        ); 
-	 printf("  varSCEtaWidth_    %f\n", varSCEtaWidth_  ); 
-	 printf("  varSCPhiWidth_    %f\n", varSCPhiWidth_  ); 
-	 printf("  varRho_           %f\n", varRho_         );
-	 printf("  varPhoIsoRaw_     %f\n", varPhoIsoRaw_   );
-	 printf("  varChIsoRaw_      %f\n", varChIsoRaw_    ); 
-	 printf("  varWorstChRaw_    %f\n", varWorstChRaw_  );
-	 printf("  varESEnOverRawE_  %f\n", varESEnOverRawE_); // for endcap MVA only
-	 printf("  varESEffSigmaRR_  %f\n", varESEffSigmaRR_); // for endcap MVA only
-	 // The spectators
-	 printf("  varPt_    %f\n", varPt_          ); 
-	 printf("  varEta_  %f\n", varEta_         );
-      }
-
       //
       // Compute the MVA value for this photon. The MVA value here is stored
       // in a TTree, but one can also cut on the MVA value at this point.
