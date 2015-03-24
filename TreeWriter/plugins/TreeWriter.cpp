@@ -87,7 +87,7 @@ const float phIso_B[2][nWP] =
 { {0.0004, 0.0004, 0.0004},
   {0.0037, 0.0037, 0.0037} };
 
-bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
+static bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
 		      float hOverE, float full5x5_sigmaIetaIeta,
 		      float chIso, float nhIso, float phIso)
 {
@@ -103,7 +103,7 @@ bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
 
    return result;
 }
-bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
+static bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
 {
    bool isBarrel = fabs(pho.p.Eta()) < 1.479;
    return passWorkingPoint(iwp, isBarrel, pho.p.Pt(),
@@ -111,6 +111,25 @@ bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
 			   pho.isoChargedHadronsWithEA, pho.isoNeutralHadronsWithEA, pho.isoPhotonsWithEA);
 }
 
+static bool isLooseJet(const pat::Jet& jet)
+{
+   bool pass = true
+      && jet.neutralHadronEnergyFraction() < .99
+      && jet.neutralEmEnergyFraction()     < .99
+      && jet.nConstituents()               > 1
+      && jet.muonEnergyFraction()          < .8
+      && jet.chargedEmEnergyFraction()     < .9
+      ;
+   // additional forward requirements:
+   if (fabs(jet.eta()) > 2.4){
+      pass = pass
+	 && jet.chargedHadronEnergyFraction() > 0
+	 && jet.chargedMultiplicity()         > 0
+	 && jet.chargedEmEnergyFraction()     < .99
+	 ;
+   }
+   return pass;
+}
 
 //
 // class declaration
@@ -584,14 +603,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } // photon loop
    
    // Jets
-   PFJetIDSelectionFunctor pfjetIDLoose(PFJetIDSelectionFunctor::FIRSTDATA, PFJetIDSelectionFunctor::LOOSE);
-   pat::strbitset retPF = pfjetIDLoose.getBitTemplate();
    vJets_.clear();
    tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
-      if (!pfjetIDLoose(jet,retPF)) continue; // only use loosed jet id
+      if (!isLooseJet(jet)) continue; // only use loose jet id
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
       trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
+      trJet.someTestFloat=jet.chargedEmEnergyFraction();
       vJets_.push_back(trJet);
    } // jet loop
 
