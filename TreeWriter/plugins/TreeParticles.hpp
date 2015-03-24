@@ -10,7 +10,7 @@ namespace tree {
    class Particle {
    public:
       TVector3 p;
-
+      float    someTestFloat=0.;
    };
 
    class Photon : public Particle {
@@ -56,20 +56,22 @@ namespace tree {
 
    class Jet : public Particle{
    public:
-      //float DeltaR( const Photon &p2 ) const;
-      //float DeltaR( const Jet &p2 ) const;
-      float bCSV;
-      float chargedHadronEnergy,
-	 neutralHadronEnergy,
-	 photonEnergy,
-	 electronEnergy,
-	 muonEnergy,
-	 HFHadronEnergy,
-	 HFEMEnergy,
-	 chargedEmEnergy,
-	 chargedMuEnergy,
-	 neutralEmEnergy;
+      float bDiscriminator;
    };
+   // class Jet : public Particle{
+   // public:
+   //    float bCSV;
+   //    float chargedHadronEnergy,
+   // 	 neutralHadronEnergy,
+   // 	 photonEnergy,
+   // 	 electronEnergy,
+   // 	 muonEnergy,
+   // 	 HFHadronEnergy,
+   // 	 HFEMEnergy,
+   // 	 chargedEmEnergy,
+   // 	 chargedMuEnergy,
+   // 	 neutralEmEnergy;
+   // };
 
    bool EtGreater(const tree::Particle, const tree::Particle);
 

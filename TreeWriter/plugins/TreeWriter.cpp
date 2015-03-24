@@ -45,6 +45,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
@@ -171,7 +173,7 @@ private:
 
    // all photon variables contained in own object
    std::vector<tree::Photon>   vPhotons_;
-   std::vector<tree::Particle> vJets_;
+   std::vector<tree::Jet> vJets_;
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
@@ -576,12 +578,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } // photon loop
    
    // Jets
+   PFJetIDSelectionFunctor pfjetIDLoose(PFJetIDSelectionFunctor::FIRSTDATA, PFJetIDSelectionFunctor::LOOSE);
+   pat::strbitset retPF = pfjetIDLoose.getBitTemplate();
    vJets_.clear();
-   tree::Particle trJet;
+   tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
+      if (!pfjetIDLoose(jet,retPF)) continue; // only use loosed jet id
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+      trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
       vJets_.push_back(trJet);
-   }
+   } // jet loop
 
    // write the event
    eventTree_->Fill();

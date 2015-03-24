@@ -10,5 +10,5 @@
 - ak4PFJetsCHS
 
 
-- generate dictionaries
+- generate dictionaries (does not seem necessary, cmssw does so already)
 $ rootcint -f ROOT_dicts.cpp -c -I. TreeParticles.hpp LinkDef.h 
