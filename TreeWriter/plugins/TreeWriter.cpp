@@ -33,6 +33,7 @@
 //#include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -146,9 +147,10 @@ private:
 				 int &ancestorPID, int &ancestorStatus);
 
    // ----------member data ---------------------------
-   edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
+   edm::EDGetTokenT<reco::VertexCollection>  vtxToken_;
    edm::EDGetTokenT<edm::View<pat::Photon> > photonCollectionToken_;
-   edm::EDGetTokenT<pat::JetCollection> jetCollectionToken_;
+   edm::EDGetTokenT<pat::JetCollection>      jetCollectionToken_;
+   edm::EDGetTokenT<pat::METCollection>      metCollectionToken_;
    edm::EDGetTokenT<double> rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
    // Value maps with various quantities produced upstream
@@ -172,8 +174,9 @@ private:
 
 
    // all photon variables contained in own object
-   std::vector<tree::Photon>   vPhotons_;
-   std::vector<tree::Jet> vJets_;
+   std::vector<tree::Photon> vPhotons_;
+   std::vector<tree::Jet>    vJets_;
+   tree::Particle            met_;
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
@@ -240,6 +243,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    : vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_(consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_   (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
+   , metCollectionToken_   (consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
    , rhoToken_             (consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
    , prunedGenToken_       (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
    // Cluster shapes
@@ -262,6 +266,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
    eventTree_->Branch("photons", &vPhotons_);
    eventTree_->Branch("jets"   , &vJets_);
+   eventTree_->Branch("met"    , &met_);
   
    eventTree_->Branch("nPV"    ,  &nPV_ , "nPV/I");
    eventTree_->Branch("rho"    ,  &rho_ , "rho/F");
@@ -371,7 +376,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Get jet collection
    edm::Handle<pat::JetCollection> jetColl;
    iEvent.getByToken(jetCollectionToken_, jetColl);
-
+   edm::Handle<pat::METCollection> metColl;
+   iEvent.getByToken(metCollectionToken_, metColl);
    // Get PV
    edm::Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
@@ -589,6 +595,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       vJets_.push_back(trJet);
    } // jet loop
 
+   
+   // MET
+   const pat::MET &met = metColl->front();
+   met_.p.SetPtEtaPhi(met.pt(),met.eta(),met.phi());
+   
    // write the event
    eventTree_->Fill();
 }
