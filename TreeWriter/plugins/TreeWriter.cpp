@@ -32,6 +32,7 @@
 
 //#include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -145,6 +146,7 @@ private:
    // ----------member data ---------------------------
    edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
    edm::EDGetTokenT<edm::View<pat::Photon> > photonCollectionToken_;
+   edm::EDGetTokenT<pat::JetCollection> jetCollectionToken_;
    edm::EDGetTokenT<double> rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
    // Value maps with various quantities produced upstream
@@ -168,7 +170,8 @@ private:
 
 
    // all photon variables contained in own object
-   std::vector<tree::Photon> photons_;
+   std::vector<tree::Photon>   vPhotons_;
+   std::vector<tree::Particle> vJets_;
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
@@ -234,8 +237,9 @@ namespace EffectiveAreas {
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    : vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_(consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
-   , rhoToken_(consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
-   , prunedGenToken_(consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
+   , jetCollectionToken_   (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
+   , rhoToken_             (consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
+   , prunedGenToken_       (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
    // Cluster shapes
    , full5x5SigmaIEtaIEtaMapToken_(consumes <edm::ValueMap<float> > (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIEtaMap")))
    , full5x5SigmaIEtaIPhiMapToken_(consumes <edm::ValueMap<float> > (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIPhiMap")))
@@ -254,11 +258,11 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    edm::Service<TFileService> fs;
    eventTree_ = fs->make<TTree> ("eventTree", "event data");
 
-   eventTree_->Branch("photons", &photons_);
-   // eventTree_->Branch("vec3", &vector3_);
+   eventTree_->Branch("photons", &vPhotons_);
+   eventTree_->Branch("jets"   , &vJets_);
   
-   eventTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
-   eventTree_->Branch("rho"        ,  &rho_ , "rho/F");
+   eventTree_->Branch("nPV"    ,  &nPV_ , "nPV/I");
+   eventTree_->Branch("rho"    ,  &rho_ , "rho/F");
 
    //
    // Create and configure barrel MVA
@@ -359,8 +363,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // GEDPhoIDTools *GEDIdTool = new GEDPhoIDTools(iEvent);
 
    // Get photon collection
-   edm::Handle<edm::View<pat::Photon> > collection;
-   iEvent.getByToken(photonCollectionToken_, collection);
+   edm::Handle<edm::View<pat::Photon> > photonColl;
+   iEvent.getByToken(photonCollectionToken_, photonColl);
+
+   // Get jet collection
+   edm::Handle<pat::JetCollection> jetColl;
+   iEvent.getByToken(jetCollectionToken_, jetColl);
 
    // Get PV
    edm::Handle<reco::VertexCollection> vertices;
@@ -430,12 +438,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
    // Clear vectors
-   photons_.clear();
+   vPhotons_.clear();
 
    // photon loop
    tree::Photon trPho;
-   for( View<pat::Photon>::const_iterator pho = collection->begin();
-	pho != collection->end(); pho++){
+   for( View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
     
       // Kinematics
       if( pho->pt() < 15 ) 
@@ -445,7 +452,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.scRawEnergy = pho->superCluster()->rawEnergy();
       trPho.esEnergy    = pho->superCluster()->preshowerEnergy();
 
-      const edm::Ptr<pat::Photon> phoPtr( collection, pho - collection->begin() );
+      const edm::Ptr<pat::Photon> phoPtr( photonColl, pho - photonColl->begin() );
 
       trPho.hOverE=pho->hadTowOverEm() ;
       trPho.hasPixelSeed=(Int_t)pho->hasPixelSeed() ;
@@ -565,9 +572,17 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isTight = passWorkingPoint( WP_TIGHT , trPho);
 
       // write the photon to collection
-      photons_.push_back(trPho);
+      vPhotons_.push_back(trPho);
    } // photon loop
    
+   // Jets
+   vJets_.clear();
+   tree::Particle trJet;
+   for (const pat::Jet& jet : *jetColl){
+      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+      vJets_.push_back(trJet);
+   }
+
    // write the event
    eventTree_->Fill();
 }
