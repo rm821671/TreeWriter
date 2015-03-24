@@ -195,7 +195,7 @@ private:
    // all photon variables contained in own object
    std::vector<tree::Photon> vPhotons_;
    std::vector<tree::Jet>    vJets_;
-   tree::Particle            met_;
+   tree::MET                 met_;
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
@@ -593,7 +593,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
 
       // check working photon working points
-
       trPho.isLoose = passWorkingPoint( WP_LOOSE , trPho);
       trPho.isMedium= passWorkingPoint( WP_MEDIUM, trPho);
       trPho.isTight = passWorkingPoint( WP_TIGHT , trPho);
@@ -616,7 +615,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    // MET
    const pat::MET &met = metColl->front();
+   pat::MET::LorentzVector metRaw=met.shiftedP4(pat::MET::NoShift, pat::MET::Raw);
    met_.p.SetPtEtaPhi(met.pt(),met.eta(),met.phi());
+   met_.p_raw.SetPtEtaPhi(metRaw.pt(),metRaw.eta(),metRaw.phi());
    
    // write the event
    eventTree_->Fill();

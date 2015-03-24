@@ -5,15 +5,17 @@
 #define TREEPARTICLES_H
 
 
-namespace tree {
-
-   class Particle {
+namespace tree 
+{
+   class Particle
+   {
    public:
       TVector3 p;
       float    someTestFloat=0.;
    };
 
-   class Photon : public Particle {
+   class Photon : public Particle
+   {
    public:
       // Variables for cut based ID
       Float_t full5x5_sigmaIetaIeta;
@@ -54,7 +56,8 @@ namespace tree {
 
    };
 
-   class Jet : public Particle{
+   class Jet : public Particle
+   {
    public:
       float bDiscriminator;
    };
@@ -72,6 +75,12 @@ namespace tree {
    // 	 chargedMuEnergy,
    // 	 neutralEmEnergy;
    // };
+
+   class MET : public Particle
+   {
+   public:
+      TVector3 p_raw;
+   };
 
    bool EtGreater(const tree::Particle, const tree::Particle);
 
