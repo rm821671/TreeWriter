@@ -80,15 +80,15 @@ private:
 				 int &ancestorPID, int &ancestorStatus);
 
    // ----------member data ---------------------------
-   edm::EDGetTokenT<reco::VertexCollection>  vtxToken_;
-   edm::EDGetTokenT<edm::View<pat::Photon> > photonCollectionToken_;
-   edm::EDGetTokenT<pat::JetCollection>      jetCollectionToken_;
-   edm::EDGetTokenT<pat::MuonCollection>     muonCollectionToken_;
-   edm::EDGetTokenT<pat::ElectronCollection> electronCollectionToken_;
-   edm::EDGetTokenT<pat::METCollection>      metCollectionToken_;
-   edm::EDGetTokenT<double>                  rhoToken_;
+   edm::EDGetTokenT<reco::VertexCollection>    vtxToken_;
+   edm::EDGetTokenT<edm::View<pat::Photon> >   photonCollectionToken_;
+   edm::EDGetTokenT<pat::JetCollection>        jetCollectionToken_;
+   edm::EDGetTokenT<pat::MuonCollection>       muonCollectionToken_;
+   edm::EDGetTokenT<edm::View<pat::Electron> > electronCollectionToken_;
+   edm::EDGetTokenT<pat::METCollection>        metCollectionToken_;
+   edm::EDGetTokenT<double>                    rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
-   // Value maps with various quantities produced upstream
+   // Value maps with various quantities produced upstream (for photon id)
    edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMapToken_; 
    edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIPhiMapToken_; 
    edm::EDGetTokenT<edm::ValueMap<float> > full5x5E1x3MapToken_; 
@@ -102,9 +102,13 @@ private:
    edm::EDGetTokenT<edm::ValueMap<float> > phoPhotonIsolationToken_; 
    edm::EDGetTokenT<edm::ValueMap<float> > phoWorstChargedIsolationToken_; 
 
-   TTree *eventTree_;
+   // electron id
+   edm::EDGetTokenT<edm::ValueMap<bool> > electronLooseIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<bool> > electronTightIdMapToken_;
 
    // === TREE DATA ===
+   TTree *eventTree_;
+
    Int_t   nPV_;   // number of reconsrtucted primary vertices
    Int_t   nGoodVertices_;
    Float_t rho_;   // the rho variable

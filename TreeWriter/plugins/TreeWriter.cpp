@@ -128,7 +128,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
    , muonCollectionToken_    (consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons")))
-   , electronCollectionToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons")))
+   , electronCollectionToken_(consumes<edm::View<pat::Electron> >(iConfig.getParameter<edm::InputTag>("electrons")))
    , metCollectionToken_     (consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
    , rhoToken_               (consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
    , prunedGenToken_         (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
@@ -145,6 +145,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , phoNeutralHadronIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoNeutralHadronIsolation")))
    , phoPhotonIsolationToken_(consumes <edm::ValueMap<float> >      (iConfig.getParameter<edm::InputTag>("phoPhotonIsolation")))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
+   , electronLooseIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap")))
+   , electronTightIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdMap")))
 {
 
    edm::Service<TFileService> fs;
@@ -263,7 +265,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken(jetCollectionToken_, jetColl);
    edm::Handle<pat::MuonCollection> muonColl;
    iEvent.getByToken(muonCollectionToken_, muonColl);
-   edm::Handle<pat::ElectronCollection> electronColl;
+   edm::Handle<edm::View<pat::Electron> > electronColl;
    iEvent.getByToken(electronCollectionToken_, electronColl);
    edm::Handle<pat::METCollection> metColl;
    iEvent.getByToken(metCollectionToken_, metColl);
@@ -474,6 +476,22 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // trMuon.someTestFloat=mu.isLooseMuon();
       vMuons_.push_back(trMuon);
    } // muon loop
+
+   // Electrons
+   // Get the electron ID data from the event stream
+   edm::Handle<edm::ValueMap<bool> > loose_id_decisions;
+   edm::Handle<edm::ValueMap<bool> > tight_id_decisions;
+   iEvent.getByToken(electronLooseIdMapToken_,loose_id_decisions);
+   iEvent.getByToken(electronTightIdMapToken_,tight_id_decisions);
+
+   vElectrons_.clear();
+   tree::Particle trEl;
+   for( View<pat::Electron>::const_iterator el = electronColl->begin();el != electronColl->end(); el++){
+      const Ptr<pat::Electron> elPtr(electronColl, el - electronColl->begin() );
+      trEl.someTestFloat=(*loose_id_decisions)[ elPtr ];
+      trEl.p.SetPtEtaPhi(el->pt(),el->superCluster()->eta(),el->superCluster()->phi());
+      vElectrons_.push_back(trEl);
+   }
 
    // MET
    const pat::MET &met = metColl->front();
