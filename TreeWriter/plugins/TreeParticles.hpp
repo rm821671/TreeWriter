@@ -7,16 +7,14 @@
 
 namespace tree 
 {
-   class Particle
+   struct Particle
    {
-   public:
       TVector3 p;
       float    someTestFloat=0.;
    };
 
-   class Photon : public Particle
+   struct Photon : public Particle
    {
-   public:
       // Variables for cut based ID
       Float_t full5x5_sigmaIetaIeta;
       Float_t hOverE;
@@ -56,12 +54,11 @@ namespace tree
 
    };
 
-   class Jet : public Particle
+   struct Jet : public Particle
    {
-   public:
       float bDiscriminator;
    };
-   // class Jet : public Particle{
+   // struct Jet : public Particle{
    // public:
    //    float bCSV;
    //    float chargedHadronEnergy,
@@ -76,9 +73,13 @@ namespace tree
    // 	 neutralEmEnergy;
    // };
 
-   class MET : public Particle
+   struct Muon: public Particle
    {
-   public:
+      bool isTight;
+   };
+
+   struct MET : public Particle
+   {
       TVector3 p_raw;
    };
 

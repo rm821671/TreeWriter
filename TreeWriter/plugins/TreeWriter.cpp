@@ -150,12 +150,15 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    edm::Service<TFileService> fs;
    eventTree_ = fs->make<TTree> ("eventTree", "event data");
 
-   eventTree_->Branch("photons", &vPhotons_);
-   eventTree_->Branch("jets"   , &vJets_);
-   eventTree_->Branch("met"    , &met_);
+   eventTree_->Branch("photons"  , &vPhotons_);
+   eventTree_->Branch("jets"     , &vJets_);
+   eventTree_->Branch("electrons", &vElectrons_);
+   eventTree_->Branch("muons"    , &vMuons_);
+   eventTree_->Branch("met"      , &met_);
   
-   eventTree_->Branch("nPV"    ,  &nPV_ , "nPV/I");
-   eventTree_->Branch("rho"    ,  &rho_ , "rho/F");
+   eventTree_->Branch("nPV"           , &nPV_           , "nPV/I");
+   eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nPV/I");
+   eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
    //
    // Create and configure barrel MVA
@@ -230,13 +233,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
 TreeWriter::~TreeWriter()
 {
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-
    delete tmvaReader_[0];
    delete tmvaReader_[1];
-
 }
 
 
@@ -248,6 +246,7 @@ TreeWriter::~TreeWriter()
 void
 TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+   bool const isRealData=iEvent.isRealData();
    using namespace std;
    using namespace edm;
    using namespace reco;
@@ -262,8 +261,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Get jet collection
    edm::Handle<pat::JetCollection> jetColl;
    iEvent.getByToken(jetCollectionToken_, jetColl);
+   edm::Handle<pat::MuonCollection> muonColl;
+   iEvent.getByToken(muonCollectionToken_, muonColl);
+   edm::Handle<pat::ElectronCollection> electronColl;
+   iEvent.getByToken(electronCollectionToken_, electronColl);
    edm::Handle<pat::METCollection> metColl;
    iEvent.getByToken(metCollectionToken_, metColl);
+
    // Get PV
    edm::Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
@@ -272,17 +276,19 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    nPV_    = vertices->size();
 
    VertexCollection::const_iterator firstGoodVertex = vertices->end();
-   int firstGoodVertexIdx = 0;
+   nGoodVertices_=0;
    for (VertexCollection::const_iterator vtx = vertices->begin(); 
-	vtx != vertices->end(); ++vtx, ++firstGoodVertexIdx) {
+	vtx != vertices->end(); ++vtx) {
       // Replace isFake() for miniAOD because it requires tracks and miniAOD vertices don't have tracks:
       // Vertex.h: bool isFake() const {return (chi2_==0 && ndof_==0 && tracks_.empty());}
       if (  /*!vtx->isFake() &&*/ 
 	 !(vtx->chi2()==0 && vtx->ndof()==0) 
 	 &&  vtx->ndof()>=4. && vtx->position().Rho()<=2.0
-	 && fabs(vtx->position().Z())<=24.0) {
-	 firstGoodVertex = vtx;
-	 break;
+	 && fabs(vtx->position().Z())<=24.0) 
+      {
+	 nGoodVertices_++;
+	 // first one?
+	 if (nGoodVertices_==1) firstGoodVertex = vtx;
       }
    }
 
@@ -297,7 +303,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Get generator level info
    // Pruned particles are the one containing "important" stuff
    Handle<edm::View<reco::GenParticle> > prunedGenParticles;
-   iEvent.getByToken(prunedGenToken_,prunedGenParticles);
+   if (!isRealData){
+      iEvent.getByToken(prunedGenToken_,prunedGenParticles);      
+   }
 
    // Get the full5x5 maps
    edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMap;
@@ -331,10 +339,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
 
 
-   // Clear vectors
-   vPhotons_.clear();
-
    // photon loop
+   vPhotons_.clear();
    tree::Photon trPho;
    for( View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
     
@@ -430,8 +436,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
 
       // MC match
-      trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
-      trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
+      if (!isRealData){
+	 trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
+	 trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);	 
+      }else{
+	 trPho.isTrue=           UNMATCHED;
+	 trPho.isTrueAlternative=UNMATCHED;	 	 
+      }
 
       // check working photon working points
       trPho.isLoose = passWorkingPoint( WP_LOOSE , trPho);
@@ -453,6 +464,17 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       vJets_.push_back(trJet);
    } // jet loop
    
+   // Muons
+   vMuons_.clear();
+   tree::Muon trMuon;
+   for (const pat::Muon &mu : *muonColl) {
+      if (!mu.isLooseMuon()) continue;
+      trMuon.p.SetPtEtaPhi(mu.pt(),mu.eta(),mu.phi());
+      trMuon.isTight=mu.isTightMuon(*firstGoodVertex);
+      // trMuon.someTestFloat=mu.isLooseMuon();
+      vMuons_.push_back(trMuon);
+   } // muon loop
+
    // MET
    const pat::MET &met = metColl->front();
    pat::MET::LorentzVector metRaw=met.shiftedP4(pat::MET::NoShift, pat::MET::Raw);

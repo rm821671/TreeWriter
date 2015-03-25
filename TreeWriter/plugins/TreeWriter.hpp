@@ -86,7 +86,7 @@ private:
    edm::EDGetTokenT<pat::MuonCollection>     muonCollectionToken_;
    edm::EDGetTokenT<pat::ElectronCollection> electronCollectionToken_;
    edm::EDGetTokenT<pat::METCollection>      metCollectionToken_;
-   edm::EDGetTokenT<double> rhoToken_;
+   edm::EDGetTokenT<double>                  rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
    // Value maps with various quantities produced upstream
    edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMapToken_; 
@@ -104,14 +104,18 @@ private:
 
    TTree *eventTree_;
 
-   Int_t nPV_;        // number of reconsrtucted primary vertices
-   Float_t rho_;      // the rho variable
+   // === TREE DATA ===
+   Int_t   nPV_;   // number of reconsrtucted primary vertices
+   Int_t   nGoodVertices_;
+   Float_t rho_;   // the rho variable
 
-
-   // all photon variables contained in own object
-   std::vector<tree::Photon> vPhotons_;
-   std::vector<tree::Jet>    vJets_;
-   tree::MET                 met_;
+   // physics Objects
+   std::vector<tree::Photon>   vPhotons_;
+   std::vector<tree::Jet>      vJets_;
+   std::vector<tree::Particle> vElectrons_;
+   std::vector<tree::Muon>     vMuons_;
+   tree::MET                   met_;
+   // === ========  ===
 
    // Variables that will be containers on which TMVA Reader works
    // The variables
