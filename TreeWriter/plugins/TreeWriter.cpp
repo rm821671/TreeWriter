@@ -160,6 +160,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("muons"    , &vMuons_);
    eventTree_->Branch("met"      , &met_);
   
+   eventTree_->Branch("isRealData"    , &isRealData_    , "isRealData/O");
    eventTree_->Branch("nPV"           , &nPV_           , "nPV/I");
    eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nPV/I");
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
@@ -250,7 +251,7 @@ TreeWriter::~TreeWriter()
 void
 TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   bool const isRealData=iEvent.isRealData();
+   isRealData_=iEvent.isRealData();
    using namespace std;
    using namespace edm;
    using namespace reco;
@@ -306,7 +307,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Get generator level info
    // Pruned particles are the one containing "important" stuff
    Handle<edm::View<reco::GenParticle> > prunedGenParticles;
-   if (!isRealData){
+   if (!isRealData_){
       iEvent.getByToken(prunedGenToken_,prunedGenParticles);      
    }
 
@@ -439,7 +440,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
 
       // MC match
-      if (!isRealData){
+      if (!isRealData_){
 	 trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
 	 trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);	 
       }else{

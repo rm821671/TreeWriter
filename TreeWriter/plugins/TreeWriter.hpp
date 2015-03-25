@@ -111,6 +111,7 @@ private:
    // === TREE DATA ===
    TTree *eventTree_;
 
+   Bool_t  isRealData_; // whether data or MC
    Int_t   nPV_;   // number of reconsrtucted primary vertices
    Int_t   nGoodVertices_;
    Float_t rho_;   // the rho variable
