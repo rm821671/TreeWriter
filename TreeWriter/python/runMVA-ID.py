@@ -43,6 +43,8 @@ process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 process.ntupler = cms.EDAnalyzer('TreeWriter',
                                  photons = cms.InputTag("slimmedPhotons"),
                                  jets = cms.InputTag("slimmedJets"),
+                                 muons = cms.InputTag("slimmedMuons"),
+                                 electrons = cms.InputTag("slimmedElectrons"),
                                  mets = cms.InputTag("slimmedMETs"),
                                  rho = cms.InputTag("fixedGridRhoFastjetAll"),
                                  vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
