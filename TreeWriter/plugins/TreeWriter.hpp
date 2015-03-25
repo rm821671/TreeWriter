@@ -103,7 +103,9 @@ private:
    edm::EDGetTokenT<edm::ValueMap<float> > phoWorstChargedIsolationToken_; 
 
    // electron id
+   edm::EDGetTokenT<edm::ValueMap<bool> > electronVetoIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > electronLooseIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<bool> > electronMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > electronTightIdMapToken_;
 
    // === TREE DATA ===
@@ -116,7 +118,7 @@ private:
    // physics Objects
    std::vector<tree::Photon>   vPhotons_;
    std::vector<tree::Jet>      vJets_;
-   std::vector<tree::Particle> vElectrons_;
+   std::vector<tree::Electron> vElectrons_;
    std::vector<tree::Muon>     vMuons_;
    tree::MET                   met_;
    // === ========  ===

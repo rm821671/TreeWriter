@@ -8,7 +8,17 @@
 
 ### Jets ###
 - ak4PFJetsCHS
+- only loose id
 
+### Muons ###
+- fulfilling loose id
+- tight id boolean flag
+
+### Electrons ###
+- fulfilling "veto" id
+- boolean flags for loose/medium/tight
+- recipes: https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_min
 
 - generate dictionaries (does not seem necessary, cmssw does so already)
 $ rootcint -f ROOT_dicts.cpp -c -I. TreeParticles.hpp LinkDef.h 
+

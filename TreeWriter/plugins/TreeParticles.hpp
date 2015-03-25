@@ -10,7 +10,7 @@ namespace tree
    struct Particle
    {
       TVector3 p;
-      float    someTestFloat=0.;
+      float    someTestFloat=0.; // only for quick peeking
    };
 
    struct Photon : public Particle
@@ -75,6 +75,13 @@ namespace tree
 
    struct Muon: public Particle
    {
+      bool isTight;
+   };
+
+   struct Electron: public Particle
+   {
+      bool isLoose;
+      bool isMedium;
       bool isTight;
    };
 

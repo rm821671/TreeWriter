@@ -145,8 +145,10 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , phoNeutralHadronIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoNeutralHadronIsolation")))
    , phoPhotonIsolationToken_(consumes <edm::ValueMap<float> >      (iConfig.getParameter<edm::InputTag>("phoPhotonIsolation")))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
-   , electronLooseIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap")))
-   , electronTightIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdMap")))
+   , electronVetoIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronVetoIdMap"   )))
+   , electronLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap"  )))
+   , electronMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronMediumIdMap" )))
+   , electronTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdMap"  )))
 {
 
    edm::Service<TFileService> fs;
@@ -294,8 +296,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
    }
 
-   if ( firstGoodVertex==vertices->end() )
-      return; // skip event if there are no good PVs
+   if (nGoodVertices_==0) return; // skip event if there are no good PVs
 
    // Get rho
    edm::Handle< double > rhoH;
@@ -479,16 +480,23 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // Electrons
    // Get the electron ID data from the event stream
+   edm::Handle<edm::ValueMap<bool> > veto_id_decisions;
    edm::Handle<edm::ValueMap<bool> > loose_id_decisions;
+   edm::Handle<edm::ValueMap<bool> > medium_id_decisions;
    edm::Handle<edm::ValueMap<bool> > tight_id_decisions;
-   iEvent.getByToken(electronLooseIdMapToken_,loose_id_decisions);
-   iEvent.getByToken(electronTightIdMapToken_,tight_id_decisions);
+   iEvent.getByToken(electronVetoIdMapToken_  ,veto_id_decisions);
+   iEvent.getByToken(electronLooseIdMapToken_ ,loose_id_decisions);
+   iEvent.getByToken(electronMediumIdMapToken_,medium_id_decisions);
+   iEvent.getByToken(electronTightIdMapToken_ ,tight_id_decisions);
 
    vElectrons_.clear();
-   tree::Particle trEl;
+   tree::Electron trEl;
    for( View<pat::Electron>::const_iterator el = electronColl->begin();el != electronColl->end(); el++){
       const Ptr<pat::Electron> elPtr(electronColl, el - electronColl->begin() );
-      trEl.someTestFloat=(*loose_id_decisions)[ elPtr ];
+      if (!(*veto_id_decisions)[elPtr]) continue; // take only loose electrons
+      trEl.isLoose =(*loose_id_decisions) [elPtr];
+      trEl.isMedium=(*medium_id_decisions)[elPtr];
+      trEl.isTight =(*tight_id_decisions) [elPtr];
       trEl.p.SetPtEtaPhi(el->pt(),el->superCluster()->eta(),el->superCluster()->phi());
       vElectrons_.push_back(trEl);
    }
