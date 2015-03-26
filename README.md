@@ -3,7 +3,7 @@
 ## Building and Running ##
 Tested on lxplus:
 
-Get CMSSW envrionment 7.2 or later
+Get CMSSW environment 7.2 or later
 
     $ cmsrel CMSSW_7_2_0
     $ cd CMSSW_7_2_0/src
