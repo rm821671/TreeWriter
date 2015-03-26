@@ -1,10 +1,32 @@
-*TreeWriter* to build a tree from MiniAOD. Photon Cut-IDs and MVA are computed.
+**TreeWriter** to build a ROOT tree from MiniAOD. Photon Cut- and MVA-IDs are computed.
 
-### Photons ### 
+## Building and Running ##
+Tested on lxplus:
+
+Get CMSSW envrionment 7.2 or later
+
+    $ cmsrel CMSSW_7_2_0
+    $ cd CMSSW_7_2_0/src
+    $ cmsenv
+Get and build egamma recipes
+
+    $ git cms-merge-topic ikrav:egm_id_phys14
+    $ git clone https://github.com/ikrav/ElectronWork.git
+    $ scram b -j 8
+Now get, build and use the TreeWriter
+
+    $ git clone https://github.com/cms-susy-photon-rwth-1b/TreeWriter.git
+    $ cd TreeWriter
+    $ scram b
+    $ voms-proxy-init -voms cms
+    $ cmsRun TreeWriter/python/runTreeWriter.py
+
+
+
+## Objects ##
+### Photons ###
 - based on this recipe for MVA ID: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1552.html)
-  * `git cms-merge-topic …` necessary!
 - this Cut-ID is included manually: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1541.html)
-
 
 ### Jets ###
 - ak4PFJetsCHS
@@ -18,8 +40,3 @@
 - fulfilling "veto" id
 - boolean flags for loose/medium/tight
 - recipes: [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_min)
-
-- generate dictionaries (not necessary, cmssw does so from LinkDef.h already)
-
-    $ rootcint -f ROOT_dicts.cpp -c -I. TreeParticles.hpp LinkDef.h 
-
