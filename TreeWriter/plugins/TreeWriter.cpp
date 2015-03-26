@@ -1,23 +1,14 @@
 // -*- C++ -*-
 //
-// Package:    ElectronWork/ElectronNtupler
-// Class:      PhotonNtuplerMVADemoMiniAOD
+// Package:    TreeWriter/TreeWriter
+// Class:      TreeWriter
 // 
-/**\class PhotonNtuplerMVADemoMiniAOD PhotonNtuplerMVADemoMiniAOD.cc ElectronWork/ElectornNtupler/plugins/PhotonNtuplerMVADemoMiniAOD.cc
 
-   Description: [one line class summary]
-
-   Implementation:
-   [Notes on implementation]
-*/
 //
-// Original Author:  Ilya Kravchenko
-//         Created:  Thu, 10 Jul 2014 09:54:13 GMT
-//
+// Original Author:  Johannes Lange (adapted parts from Ilya Kravchenko)
 //
 
 #include "TreeWriter.hpp"
-// #include "TreeParticles.hpp"
 
 // Workinig point definitions
 const int nWP = 3;
