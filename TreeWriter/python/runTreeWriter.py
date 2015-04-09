@@ -20,10 +20,10 @@ process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
 process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
         # Just a handful of files from the dataset are listed below, for testing
-        # '/store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/101611CC-026E-E411-B8D7-00266CFFBF88.root',
-        '/store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/1024D6DB-7D6F-E411-AE1D-00266CFF0608.root',
-        # '/store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/107B7861-7C6F-E411-974E-00266CFFC80C.root',
-        # '/store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/12FB6345-C96C-E411-85C9-00266CFFC4D4.root',
+        # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/101611CC-026E-E411-B8D7-00266CFFBF88.root',
+        'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/1024D6DB-7D6F-E411-AE1D-00266CFF0608.root',
+        # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/107B7861-7C6F-E411-974E-00266CFFC80C.root',
+        # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/12FB6345-C96C-E411-85C9-00266CFFC4D4.root',
         # muons
         # "/store/relval/CMSSW_7_2_0/SingleMu/MINIAOD/PRE_R_72_V10A_RelVal_mu2012D-v2/00000/12AF52D0-945A-E411-A94D-0025905A48C0.root",
         # electrons
