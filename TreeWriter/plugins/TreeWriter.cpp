@@ -2,7 +2,7 @@
 //
 // Package:    TreeWriter/TreeWriter
 // Class:      TreeWriter
-// 
+//
 
 //
 // Original Author:  Johannes Lange (adapted parts from Ilya Kravchenko)
@@ -150,16 +150,18 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("electrons", &vElectrons_);
    eventTree_->Branch("muons"    , &vMuons_);
    eventTree_->Branch("met"      , &met_);
-  
+
    eventTree_->Branch("isRealData"    , &isRealData_    , "isRealData/O");
    eventTree_->Branch("nPV"           , &nPV_           , "nPV/I");
-   eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nPV/I");
+   eventTree_->Branch("true_nPV"      , &true_nPV_      , "true_nPV/I");
+   eventTree_->Branch("pu_weight"     , &pu_weight      , "pu_weight/F");
+   eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nGoodVertices/I");
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
    //
    // Create and configure barrel MVA
    //
-   tmvaReader_[0] = new TMVA::Reader( "!Color:!Silent:Error" );  
+   tmvaReader_[0] = new TMVA::Reader( "!Color:!Silent:Error" );
    tmvaReader_[0]->SetVerbose(kFALSE);
    // Add all the vars, we take the string with variable name from the weights file (the Expression field)
    tmvaReader_[0]->AddVariable("recoPhi"   , &varPhi_);
@@ -184,7 +186,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    //
    // Create and configure endcap MVA
    //
-   tmvaReader_[1] = new TMVA::Reader( "!Color:!Silent:Error" );  
+   tmvaReader_[1] = new TMVA::Reader( "!Color:!Silent:Error" );
    tmvaReader_[1]->SetVerbose(kFALSE);
    // Add all the vars, we take the string with variable name from the weights file (the Expression field)
    tmvaReader_[1]->AddVariable("recoPhi"   , &varPhi_);
@@ -246,7 +248,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
    using namespace edm;
    using namespace reco;
-  
+
    // // An object needed for isolation calculations
    // GEDPhoIDTools *GEDIdTool = new GEDPhoIDTools(iEvent);
 
@@ -273,14 +275,14 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    VertexCollection::const_iterator firstGoodVertex = vertices->end();
    nGoodVertices_=0;
-   for (VertexCollection::const_iterator vtx = vertices->begin(); 
+   for (VertexCollection::const_iterator vtx = vertices->begin();
 	vtx != vertices->end(); ++vtx) {
       // Replace isFake() for miniAOD because it requires tracks and miniAOD vertices don't have tracks:
       // Vertex.h: bool isFake() const {return (chi2_==0 && ndof_==0 && tracks_.empty());}
-      if (  /*!vtx->isFake() &&*/ 
-	 !(vtx->chi2()==0 && vtx->ndof()==0) 
+      if (  /*!vtx->isFake() &&*/
+	 !(vtx->chi2()==0 && vtx->ndof()==0)
 	 &&  vtx->ndof()>=4. && vtx->position().Rho()<=2.0
-	 && fabs(vtx->position().Z())<=24.0) 
+	 && fabs(vtx->position().Z())<=24.0)
       {
 	 nGoodVertices_++;
 	 // first one?
@@ -299,7 +301,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Pruned particles are the one containing "important" stuff
    Handle<edm::View<reco::GenParticle> > prunedGenParticles;
    if (!isRealData_){
-      iEvent.getByToken(prunedGenToken_,prunedGenParticles);      
+      iEvent.getByToken(prunedGenToken_,prunedGenParticles);
    }
 
    // Get the full5x5 maps
@@ -338,11 +340,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    vPhotons_.clear();
    tree::Photon trPho;
    for( View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
-    
+
       // Kinematics
-      if( pho->pt() < 15 ) 
+      if( pho->pt() < 15 )
 	 continue;
-    
+
       trPho.p.SetPtEtaPhi(pho->pt(),pho->superCluster()->eta(),pho->superCluster()->phi());
       trPho.scRawEnergy = pho->superCluster()->rawEnergy();
       trPho.esEnergy    = pho->superCluster()->preshowerEnergy();
@@ -372,16 +374,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // Compute isolation with effective area correction for PU
       // Find eta bin first. If eta>2.5, the last eta bin is used.
-      int etaBin = 0; 
-      while ( etaBin < EffectiveAreas::nEtaBins-1 
+      int etaBin = 0;
+      while ( etaBin < EffectiveAreas::nEtaBins-1
 	      && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
-	 ++etaBin; 
+	 ++etaBin;
       };
-      trPho.isoPhotonsWithEA        = std::max( (float)0.0, (*phoPhotonIsolationMap)       [phoPtr] 
+      trPho.isoPhotonsWithEA        = std::max( (float)0.0, (*phoPhotonIsolationMap)       [phoPtr]
 						     - rho_ * EffectiveAreas::areaPhotons[etaBin] );
-      trPho.isoNeutralHadronsWithEA = std::max( (float)0.0, (*phoNeutralHadronIsolationMap)[phoPtr] 
+      trPho.isoNeutralHadronsWithEA = std::max( (float)0.0, (*phoNeutralHadronIsolationMap)[phoPtr]
 						     - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
-      trPho.isoChargedHadronsWithEA = std::max( (float)0.0, (*phoChargedIsolationMap)      [phoPtr] 
+      trPho.isoChargedHadronsWithEA = std::max( (float)0.0, (*phoChargedIsolationMap)      [phoPtr]
 						     - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
 
       // Prepare variables and find the MVA value
@@ -401,18 +403,18 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 varE2x2overE5x5_ = 0;
 	 varE2x5overE5x5_ = 0;
       }
-      varSCEta_        = pho->superCluster()->eta(); 
-      varRawE_         = pho->superCluster()->rawEnergy(); 
-      varSCEtaWidth_   = pho->superCluster()->etaWidth(); 
-      varSCPhiWidth_   = pho->superCluster()->phiWidth(); 
+      varSCEta_        = pho->superCluster()->eta();
+      varRawE_         = pho->superCluster()->rawEnergy();
+      varSCEtaWidth_   = pho->superCluster()->etaWidth();
+      varSCPhiWidth_   = pho->superCluster()->phiWidth();
       varESEnOverRawE_ = pho->superCluster()->preshowerEnergy() / pho->superCluster()->rawEnergy();
       varESEffSigmaRR_ = (*esEffSigmaRRMap)[ phoPtr ];
-      varRho_          = rho_; 
-      varPhoIsoRaw_    = (*phoPhotonIsolationMap)[phoPtr];  
+      varRho_          = rho_;
+      varPhoIsoRaw_    = (*phoPhotonIsolationMap)[phoPtr];
       varChIsoRaw_     = (*phoChargedIsolationMap)[phoPtr];
       varWorstChRaw_   = (*phoWorstChargedIsolationMap)[phoPtr];
       // Declare spectator vars
-      varPt_ = pho->pt(); 
+      varPt_ = pho->pt();
       varEta_ = pho->eta();
 
       //
@@ -433,10 +435,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // MC match
       if (!isRealData_){
 	 trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
-	 trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);	 
+	 trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
       }else{
 	 trPho.isTrue=           UNMATCHED;
-	 trPho.isTrueAlternative=UNMATCHED;	 	 
+	 trPho.isTrueAlternative=UNMATCHED;
       }
 
       // check working photon working points
@@ -447,7 +449,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // write the photon to collection
       vPhotons_.push_back(trPho);
    } // photon loop
-   
+
    // Jets
    vJets_.clear();
    tree::Jet trJet;
@@ -458,7 +460,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trJet.someTestFloat=jet.chargedEmEnergyFraction();
       vJets_.push_back(trJet);
    } // jet loop
-   
+
    // Muons
    vMuons_.clear();
    tree::Muon trMuon;
@@ -485,7 +487,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    tree::Electron trEl;
    for( View<pat::Electron>::const_iterator el = electronColl->begin();el != electronColl->end(); el++){
       const Ptr<pat::Electron> elPtr(electronColl, el - electronColl->begin() );
-      if (!(*veto_id_decisions)[elPtr]) continue; // take only loose electrons
+      if (!(*veto_id_decisions)[elPtr]) continue; // take only 'veto' electrons
       trEl.isLoose =(*loose_id_decisions) [elPtr];
       trEl.isMedium=(*medium_id_decisions)[elPtr];
       trEl.isTight =(*tight_id_decisions) [elPtr];
@@ -498,27 +500,46 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    pat::MET::LorentzVector metRaw=met.shiftedP4(pat::MET::NoShift, pat::MET::Raw);
    met_.p.SetPtEtaPhi(met.pt(),met.eta(),met.phi());
    met_.p_raw.SetPtEtaPhi(metRaw.pt(),metRaw.eta(),metRaw.phi());
-   
+
+   // PileUp weights
+   if (!isRealData_){
+      Handle<std::vector< PileupSummaryInfo > >  PupInfo;
+      iEvent.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
+      std::vector<PileupSummaryInfo>::const_iterator PVI;
+      float Tnpv = -1;
+      for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
+	 int BX = PVI->getBunchCrossing();
+	 if(BX == 0) {
+	    Tnpv = PVI->getTrueNumInteractions();
+	    continue;
+	 }
+      }
+      true_nPV_=Tnpv;
+      pu_weight=Tnpv; // TODO! just testing
+   }else{ // real data
+      true_nPV_=-1;
+      pu_weight=1.;
+   }
    // write the event
    eventTree_->Fill();
 }
 
 
 // ------------ method called once each job just before starting event loop  ------------
-void 
+void
 TreeWriter::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void 
-TreeWriter::endJob() 
+void
+TreeWriter::endJob()
 {
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
-  void 
+  void
   TreeWriter::beginRun(edm::Run const&, edm::EventSetup const&)
   {
   }
@@ -526,7 +547,7 @@ TreeWriter::endJob()
 
 // ------------ method called when ending the processing of a run  ------------
 /*
-  void 
+  void
   TreeWriter::endRun(edm::Run const&, edm::EventSetup const&)
   {
   }
@@ -534,7 +555,7 @@ TreeWriter::endJob()
 
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
-  void 
+  void
   TreeWriter::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
   {
   }
@@ -542,7 +563,7 @@ TreeWriter::endJob()
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
-  void 
+  void
   TreeWriter::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
   {
   }
@@ -558,12 +579,12 @@ TreeWriter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
    descriptions.addDefault(desc);
 }
 
-int TreeWriter::matchToTruth(const pat::Photon &pho, 
-					      const edm::Handle<edm::View<reco::GenParticle>>  
+int TreeWriter::matchToTruth(const pat::Photon &pho,
+					      const edm::Handle<edm::View<reco::GenParticle>>
 					      &genParticles)
 {
-   // 
-   // Explicit loop and geometric matching method 
+   //
+   // Explicit loop and geometric matching method
    //
 
    // Find the closest status 1 gen photon to the reco photon
@@ -588,28 +609,28 @@ int TreeWriter::matchToTruth(const pat::Photon &pho,
    }
 
    // Find ID of the parent of the found generator level photon match
-   int ancestorPID = -999; 
+   int ancestorPID = -999;
    int ancestorStatus = -999;
    findFirstNonPhotonMother(closestPhoton, ancestorPID, ancestorStatus);
 
    // Allowed parens: quarks pdgId 1-5, or a gluon 21
    std::vector<int> allowedParents { -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -21, 21 };
-   if( !(std::find(allowedParents.begin(), 
+   if( !(std::find(allowedParents.begin(),
 		   allowedParents.end(), ancestorPID)
 	 != allowedParents.end()) ){
-      // So it is not from g, u, d, s, c, b. Check if it is from pi0 or not. 
+      // So it is not from g, u, d, s, c, b. Check if it is from pi0 or not.
       if( abs(ancestorPID) == 111 )
 	 return MATCHED_FROM_PI0;
       else
 	 return MATCHED_FROM_OTHER_SOURCES;
    }
    return MATCHED_FROM_GUDSCB;
-   
+
 }
 
 void TreeWriter::findFirstNonPhotonMother(const reco::Candidate *particle,
 							   int &ancestorPID, int &ancestorStatus){
-  
+
    if( particle == 0 ){
       printf("TreeWriter: ERROR! null candidate pointer, this should never happen\n");
       return;
@@ -623,26 +644,26 @@ void TreeWriter::findFirstNonPhotonMother(const reco::Candidate *particle,
       ancestorPID = particle->pdgId();
       ancestorStatus = particle->status();
    }
-  
+
    return;
 }
 
-int TreeWriter::matchToTruthAlternative(const pat::Photon &pho, 
-							 const edm::Handle<edm::View<reco::GenParticle>>  
+int TreeWriter::matchToTruthAlternative(const pat::Photon &pho,
+							 const edm::Handle<edm::View<reco::GenParticle>>
 							 &genParticles)
 {
 
 
-   // 
-   // Explicit loop and geometric matching method 
    //
-  
+   // Explicit loop and geometric matching method
+   //
+
    int isMatched = UNMATCHED;
-  
+
    for(size_t i=0; i<genParticles->size();i++){
       const reco::Candidate *particle = &(*genParticles)[i];
       int pid = particle->pdgId();
-      int ancestorPID = -999; 
+      int ancestorPID = -999;
       int ancestorStatus = -999;
       findFirstNonPhotonMother(particle, ancestorPID, ancestorStatus);
       if( pid ==22 && TMath::Abs( ancestorPID ) <= 22 ){
@@ -656,8 +677,8 @@ int TreeWriter::matchToTruthAlternative(const pat::Photon &pho,
 	 }
       }
    }
-    
-   return isMatched; 
+
+   return isMatched;
 }
 
 //define this as a plug-in
