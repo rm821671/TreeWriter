@@ -226,6 +226,15 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    methodName_[1] = "BDTG photons endcap";
    tmvaReader_[1]->BookMVA(methodName_[1], weightsFileName2);
 
+   // get pileup histogram(s)
+   TFile puFile(TString(cmssw_base_src+"TreeWriter/PUreweighting/puWeights.root"));
+   if (puFile.IsZombie() ){
+      edm::LogError("File not found") << "create puWeights.root! (see README)";
+      std::exit(84);
+   } else {
+      puHist_=*( (TH1F*)puFile.Get("pileupWeightS10") );
+   }
+   puFile.Close();
 }
 
 
@@ -515,11 +524,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 }
       }
       true_nPV_=Tnpv;
-      pu_weight=Tnpv; // TODO! just testing
+      pu_weight=puHist_.GetBinContent(puHist_.FindBin(Tnpv));
    }else{ // real data
       true_nPV_=-1;
       pu_weight=1.;
    }
+
    // write the event
    eventTree_->Fill();
 }

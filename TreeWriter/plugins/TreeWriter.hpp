@@ -155,6 +155,9 @@ private:
    TMVA::Reader *tmvaReader_[2];
    TString methodName_[2];
 
+   // Pileup histogram(s)
+   TH1F puHist_;
+
 };
 
 
