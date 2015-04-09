@@ -27,7 +27,7 @@ scram b
 Create Pilup Histograms
 
 ```
-cd PUreweighting && make && cd ..
+make -C PUreweighting
 ```
 Run the TreeWriter
 
