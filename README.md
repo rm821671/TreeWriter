@@ -34,6 +34,7 @@ cmsRun TreeWriter/python/runTreeWriter.py
 - based on this recipe for MVA ID: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1552.html)
 - this Cut-ID is included manually: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1541.html)
 - all photons are used. boolean flags for: loose/medium/tight
+
 ### Jets ###
 - ak4PFJetsCHS
 - only loose id
