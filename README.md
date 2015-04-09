@@ -17,17 +17,24 @@ git cms-merge-topic ikrav:egm_id_phys14
 git clone https://github.com/ikrav/ElectronWork.git
 scram b -j 8
 ```
-Now get, build and use the TreeWriter
+Get and build the TreeWriter
 
 ```
 git clone https://github.com/cms-susy-photon-rwth-1b/TreeWriter.git
 cd TreeWriter
 scram b
+```
+Create Pilup Histograms
+
+```
+cd PUreweighting && make && cd ..
+```
+Run the TreeWriter
+
+```
 voms-proxy-init -voms cms
 cmsRun TreeWriter/python/runTreeWriter.py
 ```
-
-
 
 ## Objects ##
 ### Photons ###

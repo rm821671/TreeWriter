@@ -33,6 +33,8 @@
 
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
 
+#include <SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h>
+
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
@@ -113,6 +115,8 @@ private:
 
    Bool_t  isRealData_; // whether data or MC
    Int_t   nPV_;   // number of reconsrtucted primary vertices
+   Int_t   true_nPV_;   // true number of reconsrtucted primary vertices
+   Float_t pu_weight; // pileup weight
    Int_t   nGoodVertices_;
    Float_t rho_;   // the rho variable
 
@@ -150,6 +154,9 @@ private:
    // TMVA Reader for applying MVA
    TMVA::Reader *tmvaReader_[2];
    TString methodName_[2];
+
+   // Pileup histogram(s)
+   TH1F puHist_;
 
 };
 
