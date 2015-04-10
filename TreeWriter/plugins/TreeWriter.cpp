@@ -158,6 +158,11 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nGoodVertices/I");
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
+
+   eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
+   eventTree_->Branch("runNo", &runNo_, "runNo/i");
+   eventTree_->Branch("lumNo", &lumNo_, "lumNo/i");
+
    //
    // Create and configure barrel MVA
    //
@@ -529,7 +534,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       true_nPV_=-1;
       pu_weight=1.;
    }
-
+   
+   // store event identity
+   evtNo_=iEvent.id().event();
+   runNo_=iEvent.run();
+   lumNo_=iEvent.luminosityBlock();
    // write the event
    eventTree_->Fill();
 }

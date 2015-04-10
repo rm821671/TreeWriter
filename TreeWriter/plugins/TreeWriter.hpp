@@ -120,6 +120,10 @@ private:
    Int_t   nGoodVertices_;
    Float_t rho_;   // the rho variable
 
+   ULong64_t evtNo_;
+   UInt_t    runNo_;
+   UInt_t    lumNo_;
+
    // physics Objects
    std::vector<tree::Photon>   vPhotons_;
    std::vector<tree::Jet>      vJets_;
