@@ -128,7 +128,8 @@ namespace EffectiveAreas {
 // constructors and destructor
 //
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
-   : vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
+   : dHT_cut_(iConfig.getUntrackedParameter<double>("HT_cut"))
+   , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
    , muonCollectionToken_    (consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons")))
@@ -384,8 +385,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    hCutFlow_->Fill("jets",1);
 
    double const HT=computeHT(vJets_);
-   // TODO read from config
-   if (HT<100) return;
+   if (HT<dHT_cut_) return;
    hCutFlow_->Fill("HT",1);
 
    // photon loop
