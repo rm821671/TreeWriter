@@ -375,10 +375,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    vJets_.clear();
    tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
-      if (!isLooseJet(jet)) continue; // only use loose jet id
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
       trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
       trJet.someTestFloat=jet.chargedEmEnergyFraction();
+      trJet.isLoose=isLooseJet(jet);
       vJets_.push_back(trJet);
    } // jet loop
 

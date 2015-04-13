@@ -56,6 +56,7 @@ namespace tree
 
    struct Jet : public Particle
    {
+      bool isLoose;
       float bDiscriminator;
    };
    // struct Jet : public Particle{

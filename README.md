@@ -47,7 +47,8 @@ in the python config, set
 
 ### Jets ###
 - ak4PFJetsCHS
-- only loose id
+- all jets are used
+- boolean flag for: loose
 
 ### Muons ###
 - fulfilling loose id
