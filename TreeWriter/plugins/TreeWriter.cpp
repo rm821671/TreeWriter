@@ -255,7 +255,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","photons","jets","final"}};
+   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","photons","jets","HT","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -504,6 +504,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    double const HT=computeHT(vJets_);
    // TODO read from config
    if (HT<100) return;
+   hCutFlow_->Fill("HT",1);
 
    // Muons
    vMuons_.clear();
