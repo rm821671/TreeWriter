@@ -132,6 +132,11 @@ private:
    tree::MET                   met_;
    // === ========  ===
 
+   // histogram to store #evts after each "cut"
+   TH1F* hCutFlow_;
+
+
+   // === VARIABLES NOT STORED IN TREE ===
    // Variables that will be containers on which TMVA Reader works
    // The variables
    float varPhi_;
@@ -160,7 +165,7 @@ private:
    TString methodName_[2];
 
    // Pileup histogram(s)
-   TH1F puHist_;
+   TH1F hPU_;
 
 };
 

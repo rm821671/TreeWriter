@@ -237,9 +237,14 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
       edm::LogError("File not found") << "create puWeights.root! (see README)";
       std::exit(84);
    } else {
-      puHist_=*( (TH1F*)puFile.Get("pileupWeightS10") );
+      hPU_=*( (TH1F*)puFile.Get("pileupWeightS10") );
    }
    puFile.Close();
+
+   // create cut-flow histogram
+   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","photons","jets","final"}};
+   hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
+   for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
 
 
@@ -258,6 +263,7 @@ TreeWriter::~TreeWriter()
 void
 TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+   hCutFlow_->Fill("initial",1);
    isRealData_=iEvent.isRealData();
    using namespace std;
    using namespace edm;
@@ -305,6 +311,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    if (nGoodVertices_==0) return; // skip event if there are no good PVs
+   hCutFlow_->Fill("nGoodVertices",1);
 
    // Get rho
    edm::Handle< double > rhoH;
@@ -464,6 +471,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       vPhotons_.push_back(trPho);
    } // photon loop
 
+   if (vPhotons_.empty()) return;
+   hCutFlow_->Fill("photons",1);
+
    // Jets
    vJets_.clear();
    tree::Jet trJet;
@@ -474,6 +484,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trJet.someTestFloat=jet.chargedEmEnergyFraction();
       vJets_.push_back(trJet);
    } // jet loop
+
+   if (vJets_.empty()) return;
+   hCutFlow_->Fill("jets",1);
 
    // Muons
    vMuons_.clear();
@@ -529,12 +542,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 }
       }
       true_nPV_=Tnpv;
-      pu_weight=puHist_.GetBinContent(puHist_.FindBin(Tnpv));
+      pu_weight=hPU_.GetBinContent(hPU_.FindBin(Tnpv));
    }else{ // real data
       true_nPV_=-1;
       pu_weight=1.;
    }
    
+   hCutFlow_->Fill("final",1);
    // store event identity
    evtNo_=iEvent.id().event();
    runNo_=iEvent.run();
