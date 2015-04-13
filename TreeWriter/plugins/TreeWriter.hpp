@@ -83,6 +83,7 @@ private:
 
    // ----------member data ---------------------------
    double dHT_cut_;
+   double dPhoton_pT_cut_;
 
    edm::EDGetTokenT<reco::VertexCollection>    vtxToken_;
    edm::EDGetTokenT<edm::View<pat::Photon> >   photonCollectionToken_;

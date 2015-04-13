@@ -39,7 +39,8 @@ process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
-                                    HT_cut=cms.untracked.double(100.),
+                                    HT_cut=cms.untracked.double(200.),
+                                    photon_pT_cut=cms.untracked.double(90.),
                                     # physics objects
                                     photons = cms.InputTag("slimmedPhotons"),
                                     jets = cms.InputTag("slimmedJets"),
