@@ -1,8 +1,6 @@
 **TreeWriter** to build a ROOT tree from MiniAOD. Photon Cut- and MVA-IDs are computed.
 
 ## Building and Running ##
-Tested on lxplus:
-
 Get CMSSW environment 7.2 or later
 
 ```
@@ -38,7 +36,8 @@ cmsRun TreeWriter/python/runTreeWriter.py
 
 ## Configure ##
 in the python config, set
-- `HT_cut`
+- `HT_cut`: minimum HT
+- `photon_pT_cut`: minimum leading-photon pT
 
 ## Objects ##
 ### Photons ###
