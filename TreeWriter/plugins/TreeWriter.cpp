@@ -255,7 +255,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","photons","jets","HT","final"}};
+   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","jets","HT","photons","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -369,6 +369,24 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::ValueMap<float> > phoWorstChargedIsolationMap;
    iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
 
+   // Jets
+   vJets_.clear();
+   tree::Jet trJet;
+   for (const pat::Jet& jet : *jetColl){
+      if (!isLooseJet(jet)) continue; // only use loose jet id
+      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+      trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
+      trJet.someTestFloat=jet.chargedEmEnergyFraction();
+      vJets_.push_back(trJet);
+   } // jet loop
+
+   if (vJets_.empty()) return;
+   hCutFlow_->Fill("jets",1);
+
+   double const HT=computeHT(vJets_);
+   // TODO read from config
+   if (HT<100) return;
+   hCutFlow_->Fill("HT",1);
 
    // photon loop
    vPhotons_.clear();
@@ -486,25 +504,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if (vPhotons_.empty()) return;
    hCutFlow_->Fill("photons",1);
-
-   // Jets
-   vJets_.clear();
-   tree::Jet trJet;
-   for (const pat::Jet& jet : *jetColl){
-      if (!isLooseJet(jet)) continue; // only use loose jet id
-      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
-      trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
-      trJet.someTestFloat=jet.chargedEmEnergyFraction();
-      vJets_.push_back(trJet);
-   } // jet loop
-
-   if (vJets_.empty()) return;
-   hCutFlow_->Fill("jets",1);
-
-   double const HT=computeHT(vJets_);
-   // TODO read from config
-   if (HT<100) return;
-   hCutFlow_->Fill("HT",1);
 
    // Muons
    vMuons_.clear();
