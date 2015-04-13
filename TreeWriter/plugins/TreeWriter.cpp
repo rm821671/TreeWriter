@@ -10,7 +10,7 @@
 
 #include "TreeWriter.hpp"
 
-// Workinig point definitions
+// photon workinig point definitions
 const int nWP = 3;
 enum WpType { WP_LOOSE = 0,
 	      WP_MEDIUM,
@@ -62,6 +62,7 @@ static bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
 			   pho.isoChargedHadronsWithEA, pho.isoNeutralHadronsWithEA, pho.isoPhotonsWithEA);
 }
 
+// jet ID
 static bool isLooseJet(const pat::Jet& jet)
 {
    bool pass = true
@@ -80,6 +81,18 @@ static bool isLooseJet(const pat::Jet& jet)
 	 ;
    }
    return pass;
+}
+
+// compute HT using RECO objects to "reproduce" the trigger requirements
+static double computeHT(const std::vector<tree::Jet>& jets)
+{
+   double HT=0;
+   double pt=0;
+   for (const tree::Jet& jet: jets){
+      pt=jet.p.Pt();
+      if (fabs(jet.p.Eta())<3.0 && pt>40) HT+=pt;
+   }
+   return HT;
 }
 
 //
@@ -115,7 +128,8 @@ namespace EffectiveAreas {
 // constructors and destructor
 //
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
-   : vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
+   : dHT_cut_(iConfig.getUntrackedParameter<double>("HT_cut"))
+   , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
    , muonCollectionToken_    (consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons")))
@@ -242,7 +256,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","photons","jets","final"}};
+   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","jets","HT","photons","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -356,6 +370,23 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::ValueMap<float> > phoWorstChargedIsolationMap;
    iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
 
+   // Jets
+   vJets_.clear();
+   tree::Jet trJet;
+   for (const pat::Jet& jet : *jetColl){
+      if (!isLooseJet(jet)) continue; // only use loose jet id
+      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+      trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
+      trJet.someTestFloat=jet.chargedEmEnergyFraction();
+      vJets_.push_back(trJet);
+   } // jet loop
+
+   if (vJets_.empty()) return;
+   hCutFlow_->Fill("jets",1);
+
+   double const HT=computeHT(vJets_);
+   if (HT<dHT_cut_) return;
+   hCutFlow_->Fill("HT",1);
 
    // photon loop
    vPhotons_.clear();
@@ -473,20 +504,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if (vPhotons_.empty()) return;
    hCutFlow_->Fill("photons",1);
-
-   // Jets
-   vJets_.clear();
-   tree::Jet trJet;
-   for (const pat::Jet& jet : *jetColl){
-      if (!isLooseJet(jet)) continue; // only use loose jet id
-      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
-      trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
-      trJet.someTestFloat=jet.chargedEmEnergyFraction();
-      vJets_.push_back(trJet);
-   } // jet loop
-
-   if (vJets_.empty()) return;
-   hCutFlow_->Fill("jets",1);
 
    // Muons
    vMuons_.clear();

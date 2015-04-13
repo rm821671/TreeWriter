@@ -36,6 +36,10 @@ voms-proxy-init -voms cms
 cmsRun TreeWriter/python/runTreeWriter.py
 ```
 
+## Configure ##
+in the python config, set
+- `HT_cut`
+
 ## Objects ##
 ### Photons ###
 - based on this recipe for MVA ID: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1552.html)
