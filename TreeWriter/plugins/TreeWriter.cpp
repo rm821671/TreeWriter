@@ -10,7 +10,7 @@
 
 #include "TreeWriter.hpp"
 
-// Workinig point definitions
+// photon workinig point definitions
 const int nWP = 3;
 enum WpType { WP_LOOSE = 0,
 	      WP_MEDIUM,
@@ -62,6 +62,7 @@ static bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
 			   pho.isoChargedHadronsWithEA, pho.isoNeutralHadronsWithEA, pho.isoPhotonsWithEA);
 }
 
+// jet ID
 static bool isLooseJet(const pat::Jet& jet)
 {
    bool pass = true
@@ -80,6 +81,18 @@ static bool isLooseJet(const pat::Jet& jet)
 	 ;
    }
    return pass;
+}
+
+// compute HT using RECO objects to "reproduce" the trigger requirements
+static double computeHT(const std::vector<tree::Jet>& jets)
+{
+   double HT=0;
+   double pt=0;
+   for (const tree::Jet& jet: jets){
+      pt=jet.p.Pt();
+      if (fabs(jet.p.Eta())<3.0 && pt>40) HT+=pt;
+   }
+   return HT;
 }
 
 //
@@ -487,6 +500,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if (vJets_.empty()) return;
    hCutFlow_->Fill("jets",1);
+
+   double const HT=computeHT(vJets_);
+   // TODO read from config
+   if (HT<100) return;
 
    // Muons
    vMuons_.clear();
