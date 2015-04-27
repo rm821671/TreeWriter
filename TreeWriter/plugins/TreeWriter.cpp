@@ -133,6 +133,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
+   , genJetCollectionToken_  (consumes<reco::GenJetCollection>(iConfig.getParameter<edm::InputTag>("genJets")))
    , muonCollectionToken_    (consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons")))
    , electronCollectionToken_(consumes<edm::View<pat::Electron> >(iConfig.getParameter<edm::InputTag>("electrons")))
    , metCollectionToken_     (consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
@@ -162,6 +163,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
    eventTree_->Branch("photons"  , &vPhotons_);
    eventTree_->Branch("jets"     , &vJets_);
+   eventTree_->Branch("genJets"  , &vGenJets_);
    eventTree_->Branch("electrons", &vElectrons_);
    eventTree_->Branch("muons"    , &vMuons_);
    eventTree_->Branch("met"      , &met_);
@@ -294,6 +296,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Get jet collection
    edm::Handle<pat::JetCollection> jetColl;
    iEvent.getByToken(jetCollectionToken_, jetColl);
+   edm::Handle<reco::GenJetCollection> genJetColl;
+   iEvent.getByToken(genJetCollectionToken_, genJetColl);
    edm::Handle<pat::MuonCollection> muonColl;
    iEvent.getByToken(muonCollectionToken_, muonColl);
    edm::Handle<edm::View<pat::Electron> > electronColl;
@@ -381,6 +385,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trJet.isLoose=isLooseJet(jet);
       vJets_.push_back(trJet);
    } // jet loop
+
+   vGenJets_.clear();
+   tree::Particle trGJet;
+   for (const reco::GenJet& jet: *genJetColl){
+      trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+      vGenJets_.push_back(trGJet);
+   }
 
    if (vJets_.empty()) return;
    hCutFlow_->Fill("jets",1);
