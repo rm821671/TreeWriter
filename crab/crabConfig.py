@@ -1,4 +1,7 @@
 from WMCore.Configuration import Configuration
+import os
+
+cmssw_src=os.environ['CMSSW_BASE']+'/src/'
 
 config = Configuration()
 
@@ -10,8 +13,8 @@ config.General.transferLogs = False
 config.section_("JobType")
 config.JobType.pluginName  = 'Analysis'
 # Name of the CMSSW configuration file
-config.JobType.psetName    = '/.automount/home/home__home4/institut_1b/lange/cmssw/CMSSW_7_2_0/src/TreeWriter/TreeWriter/python/runTreeWriter.py'
-config.JobType.inputFiles  = ['/.automount/home/home__home4/institut_1b/lange/cmssw/CMSSW_7_2_0/src/TreeWriter/PUreweighting/puWeights.root']
+config.JobType.psetName    = cmssw_src+'TreeWriter/TreeWriter/python/runTreeWriter.py'
+config.JobType.inputFiles  = [cmssw_src+'TreeWriter/PUreweighting/puWeights.root']
 
 config.section_("Data")
 config.Data.inputDataset = '/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
