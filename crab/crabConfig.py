@@ -14,7 +14,6 @@ config.section_("JobType")
 config.JobType.pluginName  = 'Analysis'
 # Name of the CMSSW configuration file
 config.JobType.psetName    = cmssw_src+'TreeWriter/TreeWriter/python/runTreeWriter.py'
-config.JobType.inputFiles  = [cmssw_src+'TreeWriter/PUreweighting/puWeights.root']
 
 config.section_("Data")
 config.Data.inputDataset = '/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
