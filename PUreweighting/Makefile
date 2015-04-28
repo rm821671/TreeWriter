@@ -4,11 +4,16 @@ PU_JSON=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Pi
 
 PU_CALC=pileupCalc.py --calcMode true --maxPileupBin 60 --numPileupBins 60 -i $(ANA_JSON) --inputLumiJSON $(PU_JSON)
 
-puWeights.root: createWeights.py nTrueVertexMC.root nTrueVertexData.root
-	python createWeights.py --mc nTrueVertexMC.root --data nTrueVertexData.root -o $@
+all: data/puWeights.root
+
+data:
+	mkdir -p $@
+
+data/puWeights.root: data createWeights.py nTrueVertexMC.root nTrueVertexData.root
+	python2.7 createWeights.py --mc nTrueVertexMC.root --data nTrueVertexData.root -o $@
 
 nTrueVertexMC.root: createMChist.py
-	python $^ $@
+	python2.7 $^ $@
 
 # for the pileup uncertainties shift cross section by 5% as proposed in
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVPileUpDescription#Pileup_Systematic_Errors
