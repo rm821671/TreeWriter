@@ -28,10 +28,16 @@ Create Pilup Histograms
 make -C PUreweighting
 ```
 Run the TreeWriter
-
+- locally
 ```
 voms-proxy-init -voms cms
 cmsRun TreeWriter/python/runTreeWriter.py
+```
+- on the Grid using CRAB3
+```
+. /cvmfs/cms.cern.ch/crab3/crab.sh
+cd crab
+crab submit -c crabConfig.py
 ```
 
 ## Configure ##
