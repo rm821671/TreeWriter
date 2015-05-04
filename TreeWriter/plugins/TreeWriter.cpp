@@ -566,6 +566,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (!isRealData_){
       for (const reco::GenParticle &genP: *prunedGenParticles){
 	 if (genP.status() != 1) continue; // only final state particles
+	 if (genP.pt() > 30)     continue;
 	 if (abs(genP.pdgId()) == 11){ // electron
 	    trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
 	    vGenElectrons_.push_back(trP);
