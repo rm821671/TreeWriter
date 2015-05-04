@@ -1,9 +1,8 @@
-#include <TLorentzVector.h>
-#include <TVector3.h>
-
 #ifndef TREEPARTICLES_H
 #define TREEPARTICLES_H
 
+#include <TLorentzVector.h>
+#include <TVector3.h>
 
 namespace tree 
 {
