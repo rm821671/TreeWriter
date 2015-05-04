@@ -249,7 +249,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    tmvaReader_[1]->BookMVA(methodName_[1], weightsFileName2);
 
    // get pileup histogram(s)
-   TFile puFile(TString(cmssw_base_src+"TreeWriter/PUreweighting/puWeights.root"));
+   TFile puFile(TString(cmssw_base_src+"/TreeWriter/PUreweighting/data/puWeights.root"));
    if (puFile.IsZombie() ){
       edm::LogError("File not found") << "create puWeights.root! (see README)";
       std::exit(84);
