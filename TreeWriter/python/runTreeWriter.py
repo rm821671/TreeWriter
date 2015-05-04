@@ -12,8 +12,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #    for PHYS14 scenario PU4bx50 : global tag is ???
 #    for PHYS14 scenario PU20bx25: global tag is PHYS14_25_V1
 #  as a rule, find the global tag in the DAS under the Configs for given dataset
-# process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
-process.GlobalTag.globaltag = 'PHYS14_25_V1'
+process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
+
 
 #
 # Define input data to read
@@ -33,10 +33,6 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
         # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
         ))
 
-#
-# Run some stuff to produce value maps needed for IDs
-#
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
@@ -46,6 +42,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     photons = cms.InputTag("slimmedPhotons"),
                                     jets = cms.InputTag("slimmedJets"),
                                     muons = cms.InputTag("slimmedMuons"),
+                                    genJets=cms.InputTag("slimmedGenJets"),
                                     electrons = cms.InputTag("slimmedElectrons"),
                                     mets = cms.InputTag("slimmedMETs"),
                                     rho = cms.InputTag("fixedGridRhoFastjetAll"),
@@ -74,6 +71,13 @@ process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('photon_ntuple_mva_mini.root')
                                    )
 
+####################
+#     PHOTONS      #
+####################
+
+# Run some stuff to produce value maps needed for IDs
+process.load("RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cfi")
+
 
 ####################
 #     ELECTRONS    #
@@ -95,6 +99,7 @@ my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElect
 #Add them to the VID producer
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+
 
 ####################
 #     RUN          #

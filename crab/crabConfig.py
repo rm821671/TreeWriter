@@ -17,8 +17,6 @@ config.JobType.psetName    = cmssw_src+'TreeWriter/TreeWriter/python/runTreeWrit
 
 config.section_("Data")
 config.Data.inputDataset = '/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
-# config.Data.inputDataset = '/SingleElectron/CMSSW_7_2_0-PRE_R_72_V10A_RelVal_electron2012D-v2/MINIAOD'
-# config.Data.inputDataset = '/SingleMu/CMSSW_7_2_0-PRE_R_72_V10A_RelVal_mu2012D-v2/MINIAOD'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 100
 config.Data.publication = False
