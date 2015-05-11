@@ -1,18 +1,17 @@
 **TreeWriter** to build a ROOT tree from MiniAOD. Photon Cut- and MVA-IDs are computed.
 
 ## Building and Running ##
-Get CMSSW environment 7.2 or later
+Get CMSSW environment 74X
 
 ```
-cmsrel CMSSW_7_2_0
-cd CMSSW_7_2_0/src
+cmsrel CMSSW_7_4_0
+cd CMSSW_7_4_0/src
 cmsenv
 ```
 Get and build egamma recipes
 
 ```
-git cms-merge-topic ikrav:egm_id_phys14
-git clone https://github.com/ikrav/ElectronWork.git
+git cms-merge-topic ikrav:egm_id_74X_v0
 scram b -j 8
 ```
 Get and build the TreeWriter
