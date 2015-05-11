@@ -49,6 +49,8 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     rho = cms.InputTag("fixedGridRhoFastjetAll"),
                                     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
+                                    beamSpot = cms.InputTag('offlineBeamSpot'),
+                                    conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
                                     # photon id related values
                                     full5x5SigmaIEtaIEtaMap   = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta"),
                                     full5x5SigmaIEtaIPhiMap   = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIPhi"),
@@ -62,14 +64,15 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     phoPhotonIsolation = cms.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     # electron IDs
-                                    electronVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-veto"),
-                                    electronLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-loose"),
-                                    electronMediumIdMap= cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-medium"),
-                                    electronTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-tight"),
-                                    )
+                                    eleVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
+                                    eleLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
+                                    eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
+                                    eleTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    eleHEEPIdMap = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV51")
+)
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('photon_ntuple_mva_mini.root')
+                                   fileName = cms.string('photonTree.root')
                                    )
 
 ####################
@@ -84,23 +87,19 @@ process.load("RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cfi")
 #     ELECTRONS    #
 ####################
 
-# Load tools and function definitions
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
-# overwrite a default parameter: for miniAOD, the collection name is a slimmed one
-process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
+# turn on VID producer, indicate data format to be DataFormat.MiniAOD
+dataFormat = DataFormat.MiniAOD
+switchOnVIDElectronIdProducer(process, dataFormat)
 
-from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
-process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
+# define which IDs we want to produce
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
+'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
 
-# Define which IDs we want to produce
-# Each of these two example IDs contains all four standard
-# cut-based ID working points (only two WP of the PU20bx25 are actually used here).
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_miniAOD_cff']
-#Add them to the VID producer
+
+#add them to the VID producer
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
-
 
 ####################
 #     RUN          #
