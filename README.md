@@ -63,3 +63,7 @@ in the python config, set
 - fulfilling "veto" id
 - boolean flags for loose/medium/tight
 - recipes: [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_min)
+
+### Generated Particles ###
+- genJets collection is stored (= full slimmedGenJets)
+- gen[Electrons|Photons]: status=1, pT>30
