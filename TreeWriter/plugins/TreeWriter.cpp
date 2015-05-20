@@ -10,58 +10,6 @@
 
 #include "TreeWriter.hpp"
 
-// photon workinig point definitions
-const int nWP = 3;
-enum WpType { WP_LOOSE = 0,
-	      WP_MEDIUM,
-	      WP_TIGHT};
-
-const float hOverECut[2][nWP] =
-{ { 0.0322882, 0.0195331, 0.0115014 },
-  { 0.0226555, 0.0108988, 0.0107019 } };
-const float sieieCut[2][nWP] =
-{ {0.00995483, 0.00993551, 0.00984631},
-  {0.0269592, 0.0269045, 0.026399} };
-const float chIsoCut[2][nWP] =
-{ {2.94279, 2.61706, 1.90634},
-  {3.07267, 1.40267, 1.2556} };
-const float nhIso_A[2][nWP] =
-{ {3.15819, 2.69467, 2.5482},
-  {17.1632, 4.91651, 2.70834} };
-const float nhIso_B[2][nWP] =
-{ {0.0023, 0.0023, 0.0023},
-  {0.0116, 0.0116, 0.0116} };
-const float phIso_A[2][nWP] =
-{ {4.43365, 1.34528, 1.29427},
-  {2.10842, 2.10055, 1.90084} };
-const float phIso_B[2][nWP] =
-{ {0.0004, 0.0004, 0.0004},
-  {0.0037, 0.0037, 0.0037} };
-
-static bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
-		      float hOverE, float full5x5_sigmaIetaIeta,
-		      float chIso, float nhIso, float phIso)
-{
-   int ieta = 0;
-   if( !isBarrel ) ieta = 1;
-   bool result = 1
-      && hOverE < hOverECut[ieta][iwp]
-      && full5x5_sigmaIetaIeta > 0 // in case miniAOD sets this to zero due to pre-selection of storage
-      && full5x5_sigmaIetaIeta < sieieCut[ieta][iwp]
-      && chIso < chIsoCut[ieta][iwp]
-      && nhIso < nhIso_A[ieta][iwp] + pt * nhIso_B[ieta][iwp]
-      && phIso < phIso_A[ieta][iwp] + pt * phIso_B[ieta][iwp] ;
-
-   return result;
-}
-static bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
-{
-   bool isBarrel = fabs(pho.p.Eta()) < 1.479;
-   return passWorkingPoint(iwp, isBarrel, pho.p.Pt(),
-			   pho.hOverE, pho.full5x5_sigmaIetaIeta,
-			   pho.isoChargedHadronsWithEA, pho.isoNeutralHadronsWithEA, pho.isoPhotonsWithEA);
-}
-
 // jet ID
 static bool isLooseJet(const pat::Jet& jet)
 {

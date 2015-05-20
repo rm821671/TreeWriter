@@ -51,7 +51,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
                                     beamSpot = cms.InputTag('offlineBeamSpot'),
                                     conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
-                                    # photon id related values
+                                    # photon MVA-ID related values
                                     full5x5SigmaIEtaIEtaMap   = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta"),
                                     full5x5SigmaIEtaIPhiMap   = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIPhi"),
                                     full5x5E1x3Map      = cms.InputTag("photonIDValueMapProducer:phoFull5x5E1x3"),
