@@ -1,18 +1,17 @@
 **TreeWriter** to build a ROOT tree from MiniAOD. Photon Cut- and MVA-IDs are computed.
 
 ## Building and Running ##
-Get CMSSW environment 7.2 or later
+Get CMSSW environment 74X
 
 ```
-cmsrel CMSSW_7_2_0
-cd CMSSW_7_2_0/src
+cmsrel CMSSW_7_4_0
+cd CMSSW_7_4_0/src
 cmsenv
 ```
 Get and build egamma recipes
 
 ```
-git cms-merge-topic ikrav:egm_id_phys14
-git clone https://github.com/ikrav/ElectronWork.git
+git cms-merge-topic ikrav:egm_id_74X_v0
 scram b -j 8
 ```
 Get and build the TreeWriter
@@ -48,7 +47,8 @@ in the python config, set
 ## Objects ##
 ### Photons ###
 - based on this recipe for MVA ID: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1552.html)
-- this Cut-ID is included manually: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1541.html)
+- this Cut-ID is included manually: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1541.html) (CMSSW72X)
+  * for CMSSW74X: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1573.html) [TWiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2#Recipe_for_regular_users_for_74X)
 - all photons are used. boolean flags for: loose/medium/tight
 
 ### Jets ###
@@ -63,8 +63,13 @@ in the python config, set
 ### Electrons ###
 - fulfilling "veto" id
 - boolean flags for loose/medium/tight
-- recipes: [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_min)
+- recipes:
+  * CMSSW72X [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_min)
+  * CMSSW74X [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_74X)
 
 ### Generated Particles ###
 - genJets collection is stored (= full slimmedGenJets)
 - gen[Electrons|Photons]: status=1, pT>30
+
+# TODO #
+Replace the MVA-ID by official recipe when available.

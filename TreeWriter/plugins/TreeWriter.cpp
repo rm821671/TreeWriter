@@ -10,58 +10,6 @@
 
 #include "TreeWriter.hpp"
 
-// photon workinig point definitions
-const int nWP = 3;
-enum WpType { WP_LOOSE = 0,
-	      WP_MEDIUM,
-	      WP_TIGHT};
-
-const float hOverECut[2][nWP] =
-{ { 0.0322882, 0.0195331, 0.0115014 },
-  { 0.0226555, 0.0108988, 0.0107019 } };
-const float sieieCut[2][nWP] =
-{ {0.00995483, 0.00993551, 0.00984631},
-  {0.0269592, 0.0269045, 0.026399} };
-const float chIsoCut[2][nWP] =
-{ {2.94279, 2.61706, 1.90634},
-  {3.07267, 1.40267, 1.2556} };
-const float nhIso_A[2][nWP] =
-{ {3.15819, 2.69467, 2.5482},
-  {17.1632, 4.91651, 2.70834} };
-const float nhIso_B[2][nWP] =
-{ {0.0023, 0.0023, 0.0023},
-  {0.0116, 0.0116, 0.0116} };
-const float phIso_A[2][nWP] =
-{ {4.43365, 1.34528, 1.29427},
-  {2.10842, 2.10055, 1.90084} };
-const float phIso_B[2][nWP] =
-{ {0.0004, 0.0004, 0.0004},
-  {0.0037, 0.0037, 0.0037} };
-
-static bool passWorkingPoint(WpType iwp, bool isBarrel, float pt,
-		      float hOverE, float full5x5_sigmaIetaIeta,
-		      float chIso, float nhIso, float phIso)
-{
-   int ieta = 0;
-   if( !isBarrel ) ieta = 1;
-   bool result = 1
-      && hOverE < hOverECut[ieta][iwp]
-      && full5x5_sigmaIetaIeta > 0 // in case miniAOD sets this to zero due to pre-selection of storage
-      && full5x5_sigmaIetaIeta < sieieCut[ieta][iwp]
-      && chIso < chIsoCut[ieta][iwp]
-      && nhIso < nhIso_A[ieta][iwp] + pt * nhIso_B[ieta][iwp]
-      && phIso < phIso_A[ieta][iwp] + pt * phIso_B[ieta][iwp] ;
-
-   return result;
-}
-static bool passWorkingPoint(WpType iwp, const tree::Photon &pho)
-{
-   bool isBarrel = fabs(pho.p.Eta()) < 1.479;
-   return passWorkingPoint(iwp, isBarrel, pho.p.Pt(),
-			   pho.hOverE, pho.full5x5_sigmaIetaIeta,
-			   pho.isoChargedHadronsWithEA, pho.isoNeutralHadronsWithEA, pho.isoPhotonsWithEA);
-}
-
 // jet ID
 static bool isLooseJet(const pat::Jet& jet)
 {
@@ -152,10 +100,15 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , phoNeutralHadronIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoNeutralHadronIsolation")))
    , phoPhotonIsolationToken_(consumes <edm::ValueMap<float> >      (iConfig.getParameter<edm::InputTag>("phoPhotonIsolation")))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
+   // electron id
    , electronVetoIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronVetoIdMap"   )))
    , electronLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap"  )))
    , electronMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronMediumIdMap" )))
    , electronTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdMap"  )))
+   // photon id
+   , photonLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap"  )))
+   , photonMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
+   , photonTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
 {
 
    edm::Service<TFileService> fs;
@@ -402,11 +355,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (HT<dHT_cut_) return;
    hCutFlow_->Fill("HT",1);
 
+   edm::Handle<edm::ValueMap<bool> > loose_id_dec;
+   edm::Handle<edm::ValueMap<bool> > medium_id_dec;
+   edm::Handle<edm::ValueMap<bool> > tight_id_dec;
+   iEvent.getByToken(photonLooseIdMapToken_ ,loose_id_dec);
+   iEvent.getByToken(photonMediumIdMapToken_,medium_id_dec);
+   iEvent.getByToken(photonTightIdMapToken_ ,tight_id_dec);
    // photon loop
    vPhotons_.clear();
    tree::Photon trPho;
-   for( View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
-
+   for(View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
       // Kinematics
       if( pho->pt() < 15 )
 	 continue;
@@ -507,10 +465,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 trPho.isTrueAlternative=UNMATCHED;
       }
 
-      // check working photon working points
-      trPho.isLoose = passWorkingPoint( WP_LOOSE , trPho);
-      trPho.isMedium= passWorkingPoint( WP_MEDIUM, trPho);
-      trPho.isTight = passWorkingPoint( WP_TIGHT , trPho);
+      // check photon working points
+      trPho.isLoose = (*loose_id_dec) [phoPtr];
+      trPho.isMedium= (*medium_id_dec)[phoPtr];
+      trPho.isTight = (*tight_id_dec) [phoPtr];
 
       // write the photon to collection
       vPhotons_.push_back(trPho);
@@ -573,7 +531,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 } else if (genP.pdgId() == 22){ // photon
 	    trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
 	    vGenPhotons_.push_back(trP);
-	 } 
+	 }
       }
    }
 
@@ -596,7 +554,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       true_nPV_=-1;
       pu_weight=1.;
    }
-   
+
    hCutFlow_->Fill("final",1);
    // store event identity
    evtNo_=iEvent.id().event();
