@@ -63,15 +63,15 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     phoNeutralHadronIsolation = cms.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),
                                     phoPhotonIsolation = cms.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
-                                    # photon IDs
-                                    photonLooseIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
-                                    photonMediumIdMap= cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
-                                    photonTightIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
                                     # electron IDs
                                     electronVetoIdMap   = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
                                     electronLooseIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
                                     electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
                                     electronTightIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    # photon IDs
+                                    photonLooseIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
+                                    photonMediumIdMap= cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
+                                    photonTightIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
 )
 
 process.TFileService = cms.Service("TFileService",
@@ -89,15 +89,17 @@ dataFormat = DataFormat.MiniAOD
 
 # turn on VID producer, indicate data format to be DataFormat.MiniAOD
 switchOnVIDElectronIdProducer(process, dataFormat)
-switchOnVIDPhotonIdProducer(process, dataFormat)
+switchOnVIDPhotonIdProducer  (process, dataFormat)
 
 # define which IDs we want to produce
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
-                 'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff']
+el_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
+ph_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff']
 
 #add them to the VID producer
-for idmod in my_id_modules:
+for idmod in el_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+for idmod in ph_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
 
 ## TODO: should not be necessary any longer, once the 74X MVA-ID recipe is available
 # Run some stuff to produce value maps needed for IDs
@@ -107,4 +109,4 @@ process.load("RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cfi")
 #     RUN          #
 ####################
 
-process.p = cms.Path(process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
+process.p = cms.Path(process.photonIDValueMapProducer * process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
