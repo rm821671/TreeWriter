@@ -113,6 +113,10 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > electronLooseIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > electronMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > electronTightIdMapToken_;
+   // photon id
+   edm::EDGetTokenT<edm::ValueMap<bool> > photonLooseIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
 
    // === TREE DATA ===
    TTree *eventTree_;
