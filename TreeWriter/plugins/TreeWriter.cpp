@@ -518,12 +518,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
 
       // check photon working points
-      trPho.isLoose = passWorkingPoint( WP_LOOSE , trPho);
-      trPho.isMedium= passWorkingPoint( WP_MEDIUM, trPho);
-      trPho.isTight = passWorkingPoint( WP_TIGHT , trPho);
-      trPho.isLoose = (trPho.isLoose  == (*loose_id_dec) [phoPtr]);
-      trPho.isMedium= (trPho.isMedium == (*medium_id_dec)[phoPtr]);
-      trPho.isTight = (trPho.isTight  == (*tight_id_dec) [phoPtr]);
+      trPho.isLoose = (*loose_id_dec) [phoPtr];
+      trPho.isMedium= (*medium_id_dec)[phoPtr];
+      trPho.isTight = (*tight_id_dec) [phoPtr];
 
       // write the photon to collection
       vPhotons_.push_back(trPho);
