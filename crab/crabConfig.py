@@ -6,7 +6,7 @@ cmssw_src=os.environ['CMSSW_BASE']+'/src/'
 config = Configuration()
 
 config.section_("General")
-config.General.requestName   = 'CRAB3-test1'
+config.General.requestName   = 'QCD_500_1000'
 config.General.transferOutputs = True
 config.General.transferLogs = False
 
@@ -16,13 +16,13 @@ config.JobType.pluginName  = 'Analysis'
 config.JobType.psetName    = cmssw_src+'TreeWriter/TreeWriter/python/runTreeWriter.py'
 
 config.section_("Data")
-config.Data.inputDataset = '/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
+config.Data.inputDataset = '/QCD_HT-500To1000_13TeV-madgraph/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 100
 config.Data.publication = False
 # This string is used to construct the output dataset name
-config.Data.publishDataName = 'CRAB3-test'
-config.Data.outLFN = "/store/user/jolange/data/Test/Test"
+config.Data.publishDataName = 'knut'
+config.Data.outLFNDirBase = "/store/user/jolange/data/knut/"
 
 # These values only make sense for processing data
 #    Select input data based on a lumi mask
