@@ -91,3 +91,5 @@ target/
 
 # === ROOT Files === #
 *.root
+# === CRAB Files === #
+crab/crab_*/
