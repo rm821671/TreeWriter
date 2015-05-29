@@ -109,6 +109,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap"  )))
    , photonMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
    , photonTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
+   // for met filters
+   , m_triggerBits   (consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits")))
 {
 
    edm::Service<TFileService> fs;
@@ -555,6 +557,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       pu_weight=1.;
    }
 
+   edm::Handle<edm::TriggerResults> triggerBits;
+   iEvent.getByToken(m_triggerBits, triggerBits);
+
+   const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+   (void)names;
+   
    hCutFlow_->Fill("final",1);
    // store event identity
    evtNo_=iEvent.id().event();
