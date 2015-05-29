@@ -6,9 +6,9 @@ cmssw_src=os.environ['CMSSW_BASE']+'/src/'
 config = Configuration()
 
 config.section_("General")
-config.General.requestName   = 'QCD_500_1000'
+config.General.requestName   = 'TTJets'
 config.General.transferOutputs = True
-config.General.transferLogs = False
+config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName  = 'Analysis'
@@ -16,9 +16,9 @@ config.JobType.pluginName  = 'Analysis'
 config.JobType.psetName    = cmssw_src+'TreeWriter/TreeWriter/python/runTreeWriter.py'
 
 config.section_("Data")
-config.Data.inputDataset = '/QCD_HT-500To1000_13TeV-madgraph/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
+config.Data.inputDataset = '/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
 config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob = 100
+config.Data.unitsPerJob = 200
 config.Data.publication = False
 # This string is used to construct the output dataset name
 config.Data.publishDataName = 'knut'
