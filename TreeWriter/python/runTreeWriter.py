@@ -32,16 +32,19 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
 #
 # Define MET Filters to apply
 #
-applyMetFilters=cms.untracked.vstring([
-    "Flag_CSCTightHaloFilter",
-    "Flag_HBHENoiseFilter", # macht fast 50% weg
-    "Flag_hcalLaserEventFilter",
-    "Flag_EcalDeadCellTriggerPrimitiveFilter",
-    "Flag_trackingFailureFilter",
-    # "Flag_eeBadScFilter", # only for 2012
-    # "Flag_ecalLaserCorrFilter", # only for some rereco
-    "Flag_trkPOG_toomanystripclus53X"
-])
+applyMetFilters=cms.untracked.vstring()
+# TODO: obviously not yet tuned for 13TeV (See HBHE comment). Use them later.
+if False:
+    applyMetFilters.extend([
+        "Flag_CSCTightHaloFilter",
+        "Flag_HBHENoiseFilter", # kills almost 50% of 13TeV Events atm
+        "Flag_hcalLaserEventFilter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_trackingFailureFilter",
+        # "Flag_eeBadScFilter", # only for 2012
+        # "Flag_ecalLaserCorrFilter", # only for some rereco
+        "Flag_trkPOG_toomanystripclus53X"
+    ])
 
 
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
