@@ -214,7 +214,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","nGoodVertices","jets","HT","photons","final"}};
+   std::vector<TString> vCutBinNames{{"initial","METfilters","nGoodVertices","jets","HT","photons","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -266,6 +266,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if (applyFilters.count(name) && !metFilterBits->accept(i))
 	 return; // filter to apply is not passed
    }
+   hCutFlow_->Fill("METfilters",1);
 
    // Get photon collection
    edm::Handle<edm::View<pat::Photon> > photonColl;
