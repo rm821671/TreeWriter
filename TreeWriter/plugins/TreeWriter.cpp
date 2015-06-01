@@ -247,7 +247,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByLabel(metFilterTag, metFilterBits);
 
    // filters to apply
-   const std::set<std::string> applyFilters={
+   const std::vector<std::string> applyFilters={
       "Flag_CSCTightHaloFilter",
       "Flag_HBHENoiseFilter",
       "Flag_hcalLaserEventFilter",
@@ -257,14 +257,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       "Flag_ecalLaserCorrFilter",
       "Flag_trkPOG_toomanystripclus53X"
    };
-   // go through all filters and check them
-   const edm::TriggerNames &names = iEvent.triggerNames(*metFilterBits);
-   for (unsigned int i=0; i<names.size(); i++){
-      std::string name = names.triggerName(i);
-      // if (applyFilters.count(name)) std::cout << "->";
-      // std::cout << name << std::endl;
-      if (applyFilters.count(name) && !metFilterBits->accept(i))
-	 return; // filter to apply is not passed
+   // go through the filters and check if they were passed
+   const edm::TriggerNames &filterNames = iEvent.triggerNames(*metFilterBits);
+   for (std::string const &name: applyFilters){
+      const int index=filterNames.triggerIndex(name);
+      if (!metFilterBits->accept(index))
+	 return; // not passed
    }
    hCutFlow_->Fill("METfilters",1);
 
