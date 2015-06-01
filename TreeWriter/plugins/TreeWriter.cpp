@@ -237,9 +237,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    hCutFlow_->Fill("initial",1);
    isRealData_=iEvent.isRealData();
-   using namespace std;
-   using namespace edm;
-   using namespace reco;
 
    // MET Filters
    edm::Handle<edm::TriggerResults> metFilterBits;
@@ -289,9 +286,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //const reco::Vertex &pv = vertices->front();
    nPV_    = vertices->size();
 
-   VertexCollection::const_iterator firstGoodVertex = vertices->end();
+   reco::VertexCollection::const_iterator firstGoodVertex = vertices->end();
    nGoodVertices_=0;
-   for (VertexCollection::const_iterator vtx = vertices->begin();
+   for (reco::VertexCollection::const_iterator vtx = vertices->begin();
 	vtx != vertices->end(); ++vtx) {
       // Replace isFake() for miniAOD because it requires tracks and miniAOD vertices don't have tracks:
       // Vertex.h: bool isFake() const {return (chi2_==0 && ndof_==0 && tracks_.empty());}
@@ -316,7 +313,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // Get generator level info
    // Pruned particles are the one containing "important" stuff
-   Handle<edm::View<reco::GenParticle> > prunedGenParticles;
+   edm::Handle<edm::View<reco::GenParticle> > prunedGenParticles;
    if (!isRealData_){
       iEvent.getByToken(prunedGenToken_,prunedGenParticles);
    }
@@ -386,7 +383,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // photon loop
    vPhotons_.clear();
    tree::Photon trPho;
-   for(View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
+   for(edm::View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
       // Kinematics
       if( pho->pt() < 15 )
 	 continue;
@@ -523,8 +520,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    vElectrons_.clear();
    tree::Electron trEl;
-   for( View<pat::Electron>::const_iterator el = electronColl->begin();el != electronColl->end(); el++){
-      const Ptr<pat::Electron> elPtr(electronColl, el - electronColl->begin() );
+   for(edm::View<pat::Electron>::const_iterator el = electronColl->begin();el != electronColl->end(); el++){
+      const edm::Ptr<pat::Electron> elPtr(electronColl, el - electronColl->begin() );
       if (!(*veto_id_decisions)[elPtr]) continue; // take only 'veto' electrons
       trEl.isLoose =(*loose_id_decisions) [elPtr];
       trEl.isMedium=(*medium_id_decisions)[elPtr];
@@ -559,7 +556,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // PileUp weights
    if (!isRealData_){
-      Handle<std::vector< PileupSummaryInfo > >  PupInfo;
+      edm::Handle<std::vector< PileupSummaryInfo > >  PupInfo;
       iEvent.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
       std::vector<PileupSummaryInfo>::const_iterator PVI;
       float Tnpv = -1;
