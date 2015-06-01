@@ -246,7 +246,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::InputTag metFilterTag("TriggerResults","","PAT");
    iEvent.getByLabel(metFilterTag, metFilterBits);
 
-   std::set<std::string> applyFilters={
+   // filters to apply
+   const std::set<std::string> applyFilters={
       "Flag_CSCTightHaloFilter",
       "Flag_HBHENoiseFilter",
       "Flag_hcalLaserEventFilter",
@@ -256,20 +257,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       "Flag_ecalLaserCorrFilter",
       "Flag_trkPOG_toomanystripclus53X"
    };
+   // go through all filters and check them
    const edm::TriggerNames &names = iEvent.triggerNames(*metFilterBits);
-   int gesamt= names.size();
-   int bestanden=0;
    for (unsigned int i=0; i<names.size(); i++){
       std::string name = names.triggerName(i);
-      if (applyFilters.count(name)) std::cout << "->";
-      std::cout << name << std::endl;
-      if (metFilterBits->accept(i))
-	 bestanden++;
+      // if (applyFilters.count(name)) std::cout << "->";
+      // std::cout << name << std::endl;
+      if (applyFilters.count(name) && !metFilterBits->accept(i))
+	 return; // filter to apply is not passed
    }
-   std::cout << bestanden << "/" << gesamt << std::endl;
-
-   // // An object needed for isolation calculations
-   // GEDPhoIDTools *GEDIdTool = new GEDPhoIDTools(iEvent);
 
    // Get photon collection
    edm::Handle<edm::View<pat::Photon> > photonColl;
