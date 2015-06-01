@@ -258,8 +258,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    const edm::TriggerNames &filterNames = iEvent.triggerNames(*metFilterBits);
    for (std::string const &name: applyFilters){
       const int index=filterNames.triggerIndex(name);
-      if (!metFilterBits->accept(index))
-	 return; // not passed
+      if (!metFilterBits->accept(index)) return; // not passed
    }
    hCutFlow_->Fill("METfilters",1);
 
