@@ -109,8 +109,6 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap"  )))
    , photonMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
    , photonTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
-   // for met filters
-   , m_triggerBits   (consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits")))
 {
 
    edm::Service<TFileService> fs;
@@ -242,6 +240,33 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
    using namespace edm;
    using namespace reco;
+
+   // MET Filters
+   edm::Handle<edm::TriggerResults> metFilterBits;
+   edm::InputTag metFilterTag("TriggerResults","","PAT");
+   iEvent.getByLabel(metFilterTag, metFilterBits);
+
+   std::set<std::string> applyFilters={
+      "Flag_CSCTightHaloFilter",
+      "Flag_HBHENoiseFilter",
+      "Flag_hcalLaserEventFilter",
+      "Flag_EcalDeadCellTriggerPrimitiveFilter",
+      "Flag_trackingFailureFilter",
+      "Flag_eeBadScFilter",
+      "Flag_ecalLaserCorrFilter",
+      "Flag_trkPOG_toomanystripclus53X"
+   };
+   const edm::TriggerNames &names = iEvent.triggerNames(*metFilterBits);
+   int gesamt= names.size();
+   int bestanden=0;
+   for (unsigned int i=0; i<names.size(); i++){
+      std::string name = names.triggerName(i);
+      if (applyFilters.count(name)) std::cout << "->";
+      std::cout << name << std::endl;
+      if (metFilterBits->accept(i))
+	 bestanden++;
+   }
+   std::cout << bestanden << "/" << gesamt << std::endl;
 
    // // An object needed for isolation calculations
    // GEDPhoIDTools *GEDIdTool = new GEDPhoIDTools(iEvent);
@@ -556,12 +581,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       true_nPV_=-1;
       pu_weight=1.;
    }
-
-   edm::Handle<edm::TriggerResults> triggerBits;
-   iEvent.getByToken(m_triggerBits, triggerBits);
-
-   const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-   (void)names;
    
    hCutFlow_->Fill("final",1);
    // store event identity
