@@ -109,6 +109,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap"  )))
    , photonMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
    , photonTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
+   // met filters to apply
+   , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
 {
 
    edm::Service<TFileService> fs;
@@ -242,22 +244,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::TriggerResults> metFilterBits;
    edm::InputTag metFilterTag("TriggerResults","","PAT");
    iEvent.getByLabel(metFilterTag, metFilterBits);
-
-   // filters to apply
-   const std::vector<std::string> applyFilters={
-      "Flag_CSCTightHaloFilter",
-      "Flag_HBHENoiseFilter",
-      "Flag_hcalLaserEventFilter",
-      "Flag_EcalDeadCellTriggerPrimitiveFilter",
-      "Flag_trackingFailureFilter",
-      "Flag_eeBadScFilter",
-      "Flag_ecalLaserCorrFilter",
-      "Flag_trkPOG_toomanystripclus53X"
-   };
    // go through the filters and check if they were passed
-   const edm::TriggerNames &filterNames = iEvent.triggerNames(*metFilterBits);
-   for (std::string const &name: applyFilters){
-      const int index=filterNames.triggerIndex(name);
+   const edm::TriggerNames &allFilterNames = iEvent.triggerNames(*metFilterBits);
+   for (std::string const &name: metFilterNames_){
+      const int index=allFilterNames.triggerIndex(name);
       if (!metFilterBits->accept(index)) return; // not passed
    }
    hCutFlow_->Fill("METfilters",1);

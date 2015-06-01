@@ -121,6 +121,9 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
 
+   // met filters to apply
+   const std::vector<std::string> metFilterNames_;
+
    // === TREE DATA ===
    TTree *eventTree_;
 

@@ -29,6 +29,20 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
     # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
 ))
 
+#
+# Define MET Filters to apply
+#
+applyMetFilters=cms.untracked.vstring([
+    "Flag_CSCTightHaloFilter",
+    "Flag_HBHENoiseFilter", # macht fast 50% weg
+    "Flag_hcalLaserEventFilter",
+    "Flag_EcalDeadCellTriggerPrimitiveFilter",
+    "Flag_trackingFailureFilter",
+    # "Flag_eeBadScFilter", # only for 2012
+    # "Flag_ecalLaserCorrFilter", # only for some rereco
+    "Flag_trkPOG_toomanystripclus53X"
+])
+
 
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
@@ -67,6 +81,8 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     photonLooseIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
                                     photonMediumIdMap= cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
                                     photonTightIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    # met filters to apply
+                                    metFilterNames=applyMetFilters,
 )
 
 process.TFileService = cms.Service("TFileService",
