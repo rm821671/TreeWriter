@@ -9,6 +9,7 @@
 #pragma link C++ class tree::Muon+;
 #pragma link C++ class tree::Electron+;
 #pragma link C++ class tree::MET+;
+#pragma link C++ class tree::MET::Shift+;
 #pragma link C++ class std::vector<tree::Photon>+;
 #pragma link C++ class std::vector<tree::Particle>+;
 #pragma link C++ class std::vector<tree::Jet>+;
