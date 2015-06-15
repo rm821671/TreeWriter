@@ -90,7 +90,6 @@ namespace tree
       struct Shift {Float_t u,d;};
       TVector3 p_raw;
       Shift jEn,jRes,mu,el,tau,unclustered;
-      Float_t metUncertaintySize;
    };
 
    bool EtGreater(const tree::Particle, const tree::Particle);
