@@ -526,19 +526,19 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    met_.p.SetPtEtaPhi(metPt,met.eta(),met.phi());
    met_.p_raw.SetPtEtaPhi(metRaw.pt(),metRaw.eta(),metRaw.phi());
 
-   // TODO jet resolution e-6 ?!
-   met_.jEn.u        =(met.shiftedPt(pat::MET::JetEnUp)   - metPt)/metPt;
-   met_.jEn.d        =(met.shiftedPt(pat::MET::JetEnDown) - metPt)/metPt;
-   met_.jRes.u       =(met.shiftedPt(pat::MET::JetResUp)   - metPt)/metPt;
-   met_.jRes.d       =(met.shiftedPt(pat::MET::JetResDown) - metPt)/metPt;
-   met_.mu.u         =(met.shiftedPt(pat::MET::MuonEnUp)   - metPt)/metPt;
-   met_.mu.d         =(met.shiftedPt(pat::MET::MuonEnDown) - metPt)/metPt;
-   met_.el.u         =(met.shiftedPt(pat::MET::ElectronEnUp)   - metPt)/metPt;
-   met_.el.d         =(met.shiftedPt(pat::MET::ElectronEnDown) - metPt)/metPt;
-   met_.tau.u        =(met.shiftedPt(pat::MET::TauEnUp)   - metPt)/metPt;
-   met_.tau.d        =(met.shiftedPt(pat::MET::TauEnDown) - metPt)/metPt;
-   met_.unclustered.u=(met.shiftedPt(pat::MET::UnclusteredEnUp)   - metPt)/metPt;
-   met_.unclustered.d=(met.shiftedPt(pat::MET::UnclusteredEnDown) - metPt)/metPt;
+   // jet resolution shift is set to 0 for 74X
+   met_.uncertainty=0;
+   // loop over all up-shifts save for last one (=NoShift)
+   for (uint iShift=0; iShift<(pat::MET::METUncertaintySize-1); iShift+=2){
+      // up and down shifts
+      const double u=fabs(met.shiftedPt(pat::MET::METUncertainty(iShift))  -metPt);
+      const double d=fabs(met.shiftedPt(pat::MET::METUncertainty(iShift+1))-metPt);
+      // average
+      const double a=.5*(u+d);
+      // add deviations in quadrature
+      met_.uncertainty+=a*a;
+   }
+   met_.uncertainty=TMath::Sqrt(met_.uncertainty);
 
    // Generated Particles
    vGenPhotons_  .clear();
