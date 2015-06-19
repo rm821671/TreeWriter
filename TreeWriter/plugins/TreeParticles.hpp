@@ -87,9 +87,8 @@ namespace tree
 
    struct MET : public Particle
    {
-      struct Shift {Float_t u,d;};
       TVector3 p_raw;
-      Shift jEn,jRes,mu,el,tau,unclustered;
+      Float_t  uncertainty;
    };
 
    bool EtGreater(const tree::Particle, const tree::Particle);
