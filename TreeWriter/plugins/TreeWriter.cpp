@@ -522,8 +522,23 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // MET
    const pat::MET &met = metColl->front();
    pat::MET::LorentzVector metRaw=met.shiftedP4(pat::MET::NoShift, pat::MET::Raw);
-   met_.p.SetPtEtaPhi(met.pt(),met.eta(),met.phi());
+   double metPt=met.pt();
+   met_.p.SetPtEtaPhi(metPt,met.eta(),met.phi());
    met_.p_raw.SetPtEtaPhi(metRaw.pt(),metRaw.eta(),metRaw.phi());
+
+   // jet resolution shift is set to 0 for 74X
+   met_.uncertainty=0;
+   // loop over all up-shifts save for last one (=NoShift)
+   for (uint iShift=0; iShift<(pat::MET::METUncertaintySize-1); iShift+=2){
+      // up and down shifts
+      const double u=fabs(met.shiftedPt(pat::MET::METUncertainty(iShift))  -metPt);
+      const double d=fabs(met.shiftedPt(pat::MET::METUncertainty(iShift+1))-metPt);
+      // average
+      const double a=.5*(u+d);
+      // add deviations in quadrature
+      met_.uncertainty+=a*a;
+   }
+   met_.uncertainty=TMath::Sqrt(met_.uncertainty);
 
    // Generated Particles
    vGenPhotons_  .clear();
