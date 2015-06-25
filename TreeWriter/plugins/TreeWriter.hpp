@@ -28,6 +28,9 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -113,6 +116,13 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > electronLooseIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > electronMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > electronTightIdMapToken_;
+   // photon id
+   edm::EDGetTokenT<edm::ValueMap<bool> > photonLooseIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
+
+   // met filters to apply
+   const std::vector<std::string> metFilterNames_;
 
    // === TREE DATA ===
    TTree *eventTree_;

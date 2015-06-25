@@ -12,26 +12,46 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #    for PHYS14 scenario PU4bx50 : global tag is ???
 #    for PHYS14 scenario PU20bx25: global tag is PHYS14_25_V1
 #  as a rule, find the global tag in the DAS under the Configs for given dataset
-process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
+# process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
+process.GlobalTag.globaltag = 'MCRUN2_74_V9::All'
+
 
 
 #
 # Define input data to read
 #
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
-        # Just a handful of files from the dataset are listed below, for testing
-        'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/101611CC-026E-E411-B8D7-00266CFFBF88.root',
-        # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/1024D6DB-7D6F-E411-AE1D-00266CFF0608.root',
-        # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/107B7861-7C6F-E411-974E-00266CFFC80C.root',
-        # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/12FB6345-C96C-E411-85C9-00266CFFC4D4.root',
-        # muons
-        # 'root://xrootd-cms.infn.it///store/relval/CMSSW_7_2_0/SingleMu/MINIAOD/PRE_R_72_V10A_RelVal_mu2012D-v2/00000/12AF52D0-945A-E411-A94D-0025905A48C0.root',
-        # electrons
-        # 'root://xrootd-cms.infn.it///store/relval/CMSSW_7_2_0/SingleElectron/MINIAOD/PRE_R_72_V10A_RelVal_electron2012D-v2/00000/10721F98-F459-E411-B363-0025905B8610.root'
-        # Run from a local file
-        # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
-        ))
+    # Just a handful of files from the dataset are listed below, for testing
+    # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/101611CC-026E-E411-B8D7-00266CFFBF88.root',
+    # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/DYJetsToLL_M-50_13TeV-madgraph-pythia8/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/0432E62A-7A6C-E411-87BB-002590DB92A8.root'
+    # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/1024D6DB-7D6F-E411-AE1D-00266CFF0608.root',
+    # 'root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00D3EAF1-3174-E411-A5B2-0025904B144E.root'
+    # 740 sample
+    'root://xrootd-cms.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/143E401F-4103-E511-85AC-B083FED0FFCF.root',
+    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v2/60000/00EFF2EE-E60B-E511-B422-B499BAAC0A22.root',
+    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTbarDMJets_scalar_Mchi-50_Mphi-500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/70000/02EEF922-DC0C-E511-A09E-002618943940.root'
+    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/GJet_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v1/60000/02FC90C1-4A05-E511-9282-0025905521B2.root',
+    # Run from a local file
+    # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
+))
+
+#
+# Define MET Filters to apply
+#
+applyMetFilters=cms.untracked.vstring()
+# TODO: obviously not yet tuned for 13TeV (See HBHE comment). Use them later.
+if False:
+    applyMetFilters.extend([
+        "Flag_CSCTightHaloFilter",
+        "Flag_HBHENoiseFilter", # kills almost 50% of 13TeV Events atm
+        "Flag_hcalLaserEventFilter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_trackingFailureFilter",
+        # "Flag_eeBadScFilter", # only for 2012
+        # "Flag_ecalLaserCorrFilter", # only for some rereco
+        "Flag_trkPOG_toomanystripclus53X"
+    ])
 
 
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
@@ -48,7 +68,9 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     rho = cms.InputTag("fixedGridRhoFastjetAll"),
                                     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
-                                    # photon id related values
+                                    beamSpot = cms.InputTag('offlineBeamSpot'),
+                                    conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
+                                    # photon MVA-ID related values
                                     full5x5SigmaIEtaIEtaMap   = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta"),
                                     full5x5SigmaIEtaIPhiMap   = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIPhi"),
                                     full5x5E1x3Map      = cms.InputTag("photonIDValueMapProducer:phoFull5x5E1x3"),
@@ -61,48 +83,51 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     phoPhotonIsolation = cms.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     # electron IDs
-                                    electronVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-veto"),
-                                    electronLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-loose"),
-                                    electronMediumIdMap= cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-medium"),
-                                    electronTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-tight"),
-                                    )
+                                    electronVetoIdMap   = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
+                                    electronLooseIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
+                                    electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
+                                    electronTightIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    # photon IDs
+                                    photonLooseIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
+                                    photonMediumIdMap= cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
+                                    photonTightIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    # met filters to apply
+                                    metFilterNames=applyMetFilters,
+)
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('photon_ntuple_mva_mini.root')
-                                   )
+                                   fileName = cms.string('photonTree.root')
 
-####################
-#     PHOTONS      #
-####################
+)
 
+
+
+######################
+# PHOTONS, ELECTRONS #
+######################
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+dataFormat = DataFormat.MiniAOD
+
+# turn on VID producer, indicate data format to be DataFormat.MiniAOD
+switchOnVIDElectronIdProducer(process, dataFormat)
+switchOnVIDPhotonIdProducer  (process, dataFormat)
+
+# define which IDs we want to produce
+el_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
+ph_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff']
+
+#add them to the VID producer
+for idmod in el_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+for idmod in ph_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
+
+## TODO: should not be necessary any longer, once the 74X MVA-ID recipe is available
 # Run some stuff to produce value maps needed for IDs
 process.load("RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cfi")
-
-
-####################
-#     ELECTRONS    #
-####################
-
-# Load tools and function definitions
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
-# overwrite a default parameter: for miniAOD, the collection name is a slimmed one
-process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
-
-from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
-process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
-
-# Define which IDs we want to produce
-# Each of these two example IDs contains all four standard
-# cut-based ID working points (only two WP of the PU20bx25 are actually used here).
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_miniAOD_cff']
-#Add them to the VID producer
-for idmod in my_id_modules:
-    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
-
 
 ####################
 #     RUN          #
 ####################
 
-process.p = cms.Path(process.egmGsfElectronIDSequence * process.photonIDValueMapProducer * process.TreeWriter)
+process.p = cms.Path(process.photonIDValueMapProducer * process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
