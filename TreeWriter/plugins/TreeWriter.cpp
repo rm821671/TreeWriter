@@ -126,75 +126,9 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
    eventTree_->Branch("lumNo", &lumNo_, "lumNo/i");
 
-   //
-   // Create and configure barrel MVA
-   //
-   tmvaReader_[0] = new TMVA::Reader( "!Color:!Silent:Error" );
-   tmvaReader_[0]->SetVerbose(kFALSE);
-   // Add all the vars, we take the string with variable name from the weights file (the Expression field)
-   tmvaReader_[0]->AddVariable("recoPhi"   , &varPhi_);
-   tmvaReader_[0]->AddVariable("r9"        , &varR9_);
-   tmvaReader_[0]->AddVariable("sieie_2012", &varSieie_);
-   tmvaReader_[0]->AddVariable("sieip_2012", &varSieip_);
-   tmvaReader_[0]->AddVariable("e1x3_2012/e5x5_2012"        , &varE1x3overE5x5_);
-   tmvaReader_[0]->AddVariable("e2x2_2012/e5x5_2012"        , &varE2x2overE5x5_);
-   tmvaReader_[0]->AddVariable("e2x5_2012/e5x5_2012"        , &varE2x5overE5x5_);
-   tmvaReader_[0]->AddVariable("recoSCEta" , &varSCEta_);
-   tmvaReader_[0]->AddVariable("rawE"      , &varRawE_);
-   tmvaReader_[0]->AddVariable("scEtaWidth", &varSCEtaWidth_);
-   tmvaReader_[0]->AddVariable("scPhiWidth", &varSCPhiWidth_);
-   tmvaReader_[0]->AddVariable("rho"       , &varRho_);
-   tmvaReader_[0]->AddVariable("phoIsoRaw" , &varPhoIsoRaw_);
-   tmvaReader_[0]->AddVariable("chIsoRaw"  , &varChIsoRaw_);
-   tmvaReader_[0]->AddVariable("chWorstRaw", &varWorstChRaw_);
-   // Add spectators
-   tmvaReader_[0]->AddSpectator("recoPt" , &varPt_);
-   tmvaReader_[0]->AddSpectator("recoEta", &varEta_);
-
-   //
-   // Create and configure endcap MVA
-   //
-   tmvaReader_[1] = new TMVA::Reader( "!Color:!Silent:Error" );
-   tmvaReader_[1]->SetVerbose(kFALSE);
-   // Add all the vars, we take the string with variable name from the weights file (the Expression field)
-   tmvaReader_[1]->AddVariable("recoPhi"   , &varPhi_);
-   tmvaReader_[1]->AddVariable("r9"        , &varR9_);
-   tmvaReader_[1]->AddVariable("sieie_2012", &varSieie_);
-   tmvaReader_[1]->AddVariable("sieip_2012", &varSieip_);
-   tmvaReader_[1]->AddVariable("e1x3_2012/e5x5_2012"        , &varE1x3overE5x5_);
-   tmvaReader_[1]->AddVariable("e2x2_2012/e5x5_2012"        , &varE2x2overE5x5_);
-   tmvaReader_[1]->AddVariable("e2x5_2012/e5x5_2012"        , &varE2x5overE5x5_);
-   tmvaReader_[1]->AddVariable("recoSCEta" , &varSCEta_);
-   tmvaReader_[1]->AddVariable("rawE"      , &varRawE_);
-   tmvaReader_[1]->AddVariable("scEtaWidth", &varSCEtaWidth_);
-   tmvaReader_[1]->AddVariable("scPhiWidth", &varSCPhiWidth_);
-   tmvaReader_[1]->AddVariable("esEn/rawE" , &varESEnOverRawE_);
-   tmvaReader_[1]->AddVariable("esRR"      , &varESEffSigmaRR_);
-   tmvaReader_[1]->AddVariable("rho"       , &varRho_);
-   tmvaReader_[1]->AddVariable("phoIsoRaw" , &varPhoIsoRaw_);
-   tmvaReader_[1]->AddVariable("chIsoRaw"  , &varChIsoRaw_);
-   tmvaReader_[1]->AddVariable("chWorstRaw", &varWorstChRaw_);
-   // Add spectators
-   tmvaReader_[1]->AddSpectator("recoPt" , &varPt_);
-   tmvaReader_[1]->AddSpectator("recoEta", &varEta_);
-
-   //
-   // Book the MVA method for each category
-   //
+   // get pileup histogram(s)
    std::string cmssw_base_src = getenv("CMSSW_BASE");
    cmssw_base_src += "/src/";
-   //
-   TString localFileName1 = "EgammaAnalysis/PhotonTools/data/PHYS14/photon_general_MVA_phys14_pu20bx25_EB_V1.weights.xml";
-   TString weightsFileName1 = TString(cmssw_base_src) + localFileName1;
-   methodName_[0] = "BDTG photons barrel";
-   tmvaReader_[0]->BookMVA(methodName_[0], weightsFileName1);
-   //
-   TString localFileName2 = "EgammaAnalysis/PhotonTools/data/PHYS14/photon_general_MVA_phys14_pu20bx25_EE_V1.weights.xml";
-   TString weightsFileName2 = TString(cmssw_base_src) + localFileName2;
-   methodName_[1] = "BDTG photons endcap";
-   tmvaReader_[1]->BookMVA(methodName_[1], weightsFileName2);
-
-   // get pileup histogram(s)
    TFile puFile(TString(cmssw_base_src+"/TreeWriter/PUreweighting/data/puWeights.root"));
    if (puFile.IsZombie() ){
       edm::LogError("File not found") << "create puWeights.root! (see README)";
@@ -211,12 +145,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 }
 
 
-TreeWriter::~TreeWriter()
-{
-   delete tmvaReader_[0];
-   delete tmvaReader_[1];
-}
-
+TreeWriter::~TreeWriter(){}
 
 //
 // member functions

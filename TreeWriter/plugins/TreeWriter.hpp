@@ -155,10 +155,6 @@ private:
    // histogram to store #evts after each "cut"
    TH1F* hCutFlow_;
 
-   // TMVA Reader for applying MVA
-   TMVA::Reader *tmvaReader_[2];
-   TString methodName_[2];
-
    // Pileup histogram(s)
    TH1F hPU_;
 
