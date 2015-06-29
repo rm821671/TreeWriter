@@ -46,10 +46,9 @@ in the python config, set
 
 ## Objects ##
 ### Photons ###
-- based on this recipe for MVA ID: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1552.html)
-- this Cut-ID is included manually: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1541.html) (CMSSW72X)
-  * for CMSSW74X: [HN](https://hypernews.cern.ch/HyperNews/CMS/get/egamma/1573.html) [TWiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2#Recipe_for_regular_users_for_74X)
+- official cut-based ID and general purpose MVA are taken from [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2)
 - all photons are used. boolean flags for: loose/medium/tight
+- general purpose MVA value is stored
 
 ### Jets ###
 - ak4PFJetsCHS
