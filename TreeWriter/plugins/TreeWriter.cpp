@@ -121,6 +121,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nGoodVertices/I");
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
+   eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
 
    eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
@@ -394,6 +395,17 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }else{ // real data
       true_nPV_=-1;
       pu_weight=1.;
+   }
+
+   // generator weights
+   dummyFloat_=0.;
+   if (!isRealData_){
+      edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
+      // if(iEvent.getByLabel("generator", GenEventInfoHandle) && GenEventInfoHandle->binningValues().size() > 0)
+      //    susyEvent_->gridParams["ptHat"] = GenEventInfoHandle->binningValues()[0];
+      iEvent.getByLabel("generator", GenEventInfoHandle);
+      dummyFloat_=GenEventInfoHandle->weight();
+      // dummyFloat_=333.;
    }
    
    hCutFlow_->Fill("final",1);

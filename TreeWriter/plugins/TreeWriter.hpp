@@ -37,6 +37,7 @@
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
 
 #include <SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h>
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
@@ -136,6 +137,8 @@ private:
    Float_t pu_weight; // pileup weight
    Int_t   nGoodVertices_;
    Float_t rho_;   // the rho variable
+
+   Float_t dummyFloat_;
 
    ULong64_t evtNo_;
    UInt_t    runNo_;
