@@ -87,19 +87,6 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , metCollectionToken_     (consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
    , rhoToken_               (consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
    , prunedGenToken_         (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
-   // Cluster shapes
-   , full5x5SigmaIEtaIEtaMapToken_(consumes <edm::ValueMap<float> > (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIEtaMap")))
-   , full5x5SigmaIEtaIPhiMapToken_(consumes <edm::ValueMap<float> > (iConfig.getParameter<edm::InputTag>("full5x5SigmaIEtaIPhiMap")))
-   , full5x5E1x3MapToken_(consumes <edm::ValueMap<float> >          (iConfig.getParameter<edm::InputTag>("full5x5E1x3Map")))
-   , full5x5E2x2MapToken_(consumes <edm::ValueMap<float> >          (iConfig.getParameter<edm::InputTag>("full5x5E2x2Map")))
-   , full5x5E2x5MaxMapToken_(consumes <edm::ValueMap<float> >       (iConfig.getParameter<edm::InputTag>("full5x5E2x5MaxMap")))
-   , full5x5E5x5MapToken_(consumes <edm::ValueMap<float> >          (iConfig.getParameter<edm::InputTag>("full5x5E5x5Map")))
-   , esEffSigmaRRMapToken_(consumes <edm::ValueMap<float> >         (iConfig.getParameter<edm::InputTag>("esEffSigmaRRMap")))
-   // Isolations
-   , phoChargedIsolationToken_(consumes <edm::ValueMap<float> >     (iConfig.getParameter<edm::InputTag>("phoChargedIsolation")))
-   , phoNeutralHadronIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoNeutralHadronIsolation")))
-   , phoPhotonIsolationToken_(consumes <edm::ValueMap<float> >      (iConfig.getParameter<edm::InputTag>("phoPhotonIsolation")))
-   , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    // electron id
    , electronVetoIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronVetoIdMap"   )))
    , electronLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap"  )))
@@ -309,37 +296,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       iEvent.getByToken(prunedGenToken_,prunedGenParticles);
    }
 
-   // Get the full5x5 maps
-   edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMap;
-   iEvent.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
-   edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIPhiMap;
-   iEvent.getByToken(full5x5SigmaIEtaIPhiMapToken_, full5x5SigmaIEtaIPhiMap);
-
-   edm::Handle<edm::ValueMap<float> > full5x5E1x3Map;
-   iEvent.getByToken(full5x5E1x3MapToken_, full5x5E1x3Map);
-
-   edm::Handle<edm::ValueMap<float> > full5x5E2x2Map;
-   iEvent.getByToken(full5x5E2x2MapToken_, full5x5E2x2Map);
-
-   edm::Handle<edm::ValueMap<float> > full5x5E2x5MaxMap;
-   iEvent.getByToken(full5x5E2x5MaxMapToken_, full5x5E2x5MaxMap);
-
-   edm::Handle<edm::ValueMap<float> > full5x5E5x5Map;
-   iEvent.getByToken(full5x5E5x5MapToken_, full5x5E5x5Map);
-
-   edm::Handle<edm::ValueMap<float> > esEffSigmaRRMap;
-   iEvent.getByToken(esEffSigmaRRMapToken_, esEffSigmaRRMap);
-
-   // Get the isolation maps
-   edm::Handle<edm::ValueMap<float> > phoChargedIsolationMap;
-   iEvent.getByToken(phoChargedIsolationToken_, phoChargedIsolationMap);
-   edm::Handle<edm::ValueMap<float> > phoNeutralHadronIsolationMap;
-   iEvent.getByToken(phoNeutralHadronIsolationToken_, phoNeutralHadronIsolationMap);
-   edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
-   iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
-   edm::Handle<edm::ValueMap<float> > phoWorstChargedIsolationMap;
-   iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
-
    // Jets
    vJets_.clear();
    tree::Jet trJet;
@@ -394,64 +350,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.sigma_eta             = pho->superCluster()->etaWidth();
       trPho.sigma_phi             = pho->superCluster()->phiWidth();
       trPho.r9                    = pho->r9();
-      trPho.full5x5_sigmaIetaIeta = (*full5x5SigmaIEtaIEtaMap)[ phoPtr ];
-      trPho.full5x5_sigmaIetaIphi = (*full5x5SigmaIEtaIPhiMap)[ phoPtr ];
-
-      trPho.full5x5_e1x3    = (*full5x5E1x3Map)[ phoPtr ];
-      trPho.full5x5_e2x2    = (*full5x5E2x2Map)[ phoPtr ];
-      trPho.full5x5_e2x5Max = (*full5x5E2x5MaxMap)[ phoPtr ];
-      trPho.full5x5_e5x5    = (*full5x5E5x5Map)[ phoPtr ];
-      trPho.esEffSigmaRR    = (*esEffSigmaRRMap)[ phoPtr ];
-
-      trPho.isoChargedHadrons = (*phoChargedIsolationMap)[phoPtr];
-      trPho.isoNeutralHadrons = (*phoNeutralHadronIsolationMap)[phoPtr];
-      trPho.isoPhotons        = (*phoPhotonIsolationMap)[phoPtr];
-      trPho.isoWorstChargedHadrons = (*phoWorstChargedIsolationMap)[phoPtr];
-
-      // Compute isolation with effective area correction for PU
-      // Find eta bin first. If eta>2.5, the last eta bin is used.
-      int etaBin = 0;
-      while ( etaBin < EffectiveAreas::nEtaBins-1
-	      && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
-	 ++etaBin;
-      };
-      trPho.isoPhotonsWithEA        = std::max( (float)0.0, (*phoPhotonIsolationMap)       [phoPtr]
-						     - rho_ * EffectiveAreas::areaPhotons[etaBin] );
-      trPho.isoNeutralHadronsWithEA = std::max( (float)0.0, (*phoNeutralHadronIsolationMap)[phoPtr]
-						     - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
-      trPho.isoChargedHadronsWithEA = std::max( (float)0.0, (*phoChargedIsolationMap)      [phoPtr]
-						     - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
-
-      // Prepare variables and find the MVA value
-      varPhi_          = pho->phi();
-      varR9_           = pho->r9() ;
-      varSieie_        = (*full5x5SigmaIEtaIEtaMap)[ phoPtr ];
-      varSieip_        = (*full5x5SigmaIEtaIPhiMap)[ phoPtr ];
-      float e5x5 = (*full5x5E5x5Map)[ phoPtr ];
-      // Protect from e5x5 being zero since in miniAOD not the full info is stored
-      // for the poor quality photons.
-      if( e5x5 != 0 ){
-	 varE1x3overE5x5_ = (*full5x5E1x3Map)[ phoPtr ] / e5x5;
-	 varE2x2overE5x5_ = (*full5x5E2x2Map)[ phoPtr ] / e5x5;
-	 varE2x5overE5x5_ = (*full5x5E2x5MaxMap)[ phoPtr ]/ e5x5;
-      }else{
-	 varE1x3overE5x5_ = 0;
-	 varE2x2overE5x5_ = 0;
-	 varE2x5overE5x5_ = 0;
-      }
-      varSCEta_        = pho->superCluster()->eta();
-      varRawE_         = pho->superCluster()->rawEnergy();
-      varSCEtaWidth_   = pho->superCluster()->etaWidth();
-      varSCPhiWidth_   = pho->superCluster()->phiWidth();
-      varESEnOverRawE_ = pho->superCluster()->preshowerEnergy() / pho->superCluster()->rawEnergy();
-      varESEffSigmaRR_ = (*esEffSigmaRRMap)[ phoPtr ];
-      varRho_          = rho_;
-      varPhoIsoRaw_    = (*phoPhotonIsolationMap)[phoPtr];
-      varChIsoRaw_     = (*phoChargedIsolationMap)[phoPtr];
-      varWorstChRaw_   = (*phoWorstChargedIsolationMap)[phoPtr];
-      // Declare spectator vars
-      varPt_ = pho->pt();
-      varEta_ = pho->eta();
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
