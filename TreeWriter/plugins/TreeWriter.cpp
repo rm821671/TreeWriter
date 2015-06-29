@@ -106,9 +106,10 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , electronMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronMediumIdMap" )))
    , electronTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdMap"  )))
    // photon id
-   , photonLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap"  )))
-   , photonMediumIdMapToken_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
-   , photonTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
+   , photonLooseIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap"  )))
+   , photonMediumIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
+   , photonTightIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
+   , photonMvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("photonMvaValuesMap")))
    // met filters to apply
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
@@ -367,9 +368,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::ValueMap<bool> > loose_id_dec;
    edm::Handle<edm::ValueMap<bool> > medium_id_dec;
    edm::Handle<edm::ValueMap<bool> > tight_id_dec;
-   iEvent.getByToken(photonLooseIdMapToken_ ,loose_id_dec);
-   iEvent.getByToken(photonMediumIdMapToken_,medium_id_dec);
-   iEvent.getByToken(photonTightIdMapToken_ ,tight_id_dec);
+   edm::Handle<edm::ValueMap<float>> mva_value;
+   iEvent.getByToken(photonLooseIdMapToken_  ,loose_id_dec);
+   iEvent.getByToken(photonMediumIdMapToken_ ,medium_id_dec);
+   iEvent.getByToken(photonTightIdMapToken_  ,tight_id_dec);
+   iEvent.getByToken(photonMvaValuesMapToken_,mva_value);
    // photon loop
    vPhotons_.clear();
    tree::Photon trPho;
@@ -450,20 +453,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       varPt_ = pho->pt();
       varEta_ = pho->eta();
 
-      //
-      // Compute the MVA value for this photon. The MVA value here is stored
-      // in a TTree, but one can also cut on the MVA value at this point.
-      //
-      if( e5x5 != 0 ){
-	 if( abs( pho->superCluster()->eta() ) < 1.479 )
-	    trPho.mvaValue=tmvaReader_[0]->EvaluateMVA(methodName_[0]);
-	 else
-	    trPho.mvaValue=tmvaReader_[1]->EvaluateMVA(methodName_[1]);
-      }else{
-	 // e5x5 zero means that this photon's info hasn't been stored fully in
-	 // miniAOD since it is a poor quality photon. We can't run MVA on it.
-	 trPho.mvaValue= -999. ;
-      }
+      trPho.mvaValue=(*mva_value)[phoPtr];
 
       // MC match
       if (!isRealData_){

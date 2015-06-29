@@ -120,6 +120,7 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > photonLooseIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<float>> photonMvaValuesMapToken_;
 
    // met filters to apply
    const std::vector<std::string> metFilterNames_;
