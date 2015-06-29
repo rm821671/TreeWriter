@@ -93,6 +93,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     photonTightIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
                                     # met filters to apply
                                     metFilterNames=applyMetFilters,
+                                    pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
 )
 
 process.TFileService = cms.Service("TFileService",

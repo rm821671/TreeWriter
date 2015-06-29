@@ -124,6 +124,8 @@ private:
    // met filters to apply
    const std::vector<std::string> metFilterNames_;
 
+   const std::string pileupHistogramName_;
+
    // === TREE DATA ===
    TTree *eventTree_;
 

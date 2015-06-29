@@ -111,6 +111,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonTightIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
    // met filters to apply
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
+   , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
 {
 
    edm::Service<TFileService> fs;
@@ -211,7 +212,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
       edm::LogError("File not found") << "create puWeights.root! (see README)";
       std::exit(84);
    } else {
-      hPU_=*( (TH1F*)puFile.Get("pileupWeightS10") );
+      hPU_=*( (TH1F*)puFile.Get( pileupHistogramName_.c_str() ) );
    }
    puFile.Close();
 
