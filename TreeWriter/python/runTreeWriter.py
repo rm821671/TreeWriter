@@ -88,19 +88,16 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
                                     electronTightIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
                                     # photon IDs
-                                    photonLooseIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
-                                    photonMediumIdMap= cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
-                                    photonTightIdMap = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    photonLooseIdMap   = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
+                                    photonMediumIdMap  = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
+                                    photonTightIdMap   = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    photonMvaValuesMap = cms.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrigValues"),
                                     # met filters to apply
                                     metFilterNames=applyMetFilters,
                                     pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
 )
 
-process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('photonTree.root')
-
-)
-
+process.TFileService = cms.Service("TFileService",fileName = cms.string('photonTree.root'))
 
 
 ######################
@@ -115,7 +112,8 @@ switchOnVIDPhotonIdProducer  (process, dataFormat)
 
 # define which IDs we want to produce
 el_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
-ph_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff']
+ph_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff',
+                 'RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring15_50ns_nonTrig_V0_cff']
 
 #add them to the VID producer
 for idmod in el_id_modules:
@@ -123,12 +121,8 @@ for idmod in el_id_modules:
 for idmod in ph_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
 
-## TODO: should not be necessary any longer, once the 74X MVA-ID recipe is available
-# Run some stuff to produce value maps needed for IDs
-process.load("RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cfi")
-
 ####################
 #     RUN          #
 ####################
 
-process.p = cms.Path(process.photonIDValueMapProducer * process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
+process.p = cms.Path(process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
