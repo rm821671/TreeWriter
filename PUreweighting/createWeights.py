@@ -3,46 +3,56 @@ import ROOT
 
 def readHisto( fileName, histoname, newName="" ):
 
-	f = ROOT.TFile( fileName )
-	ROOT.gROOT.cd()
+    f = ROOT.TFile( fileName )
+    ROOT.gROOT.cd()
 
-	# This histogram is still associated with the file and will be lost after
-	# the end of the function.
-	histoInFile = f.Get( histoname ).Clone()
-	return histoInFile
+    # This histogram is still associated with the file and will be lost after
+    # the end of the function.
+    histoInFile = f.Get( histoname ).Clone()
+    return histoInFile
+
+
+def getObjectNames( filename ):
+    names = []
+    f = ROOT.TFile( filename )
+    for k in f.GetListOfKeys():
+        if isinstance( k.ReadObj(), ROOT.TH1 ):
+            names.append( k.GetName() )
+    return names
 
 
 if __name__ == "__main__":
 
-	arguments = argparse.ArgumentParser( description="Print out filters" )
-	arguments.add_argument( "-o", "--outputFilename", default="puWeights.root" )
-	arguments.add_argument( "--mc", default="mc.root"  )
-	arguments.add_argument( "--data", default="data.root" )
-	opts = arguments.parse_args()
+    arguments = argparse.ArgumentParser( description="Print out filters" )
+    arguments.add_argument( "-o", "--outputFilename", default="puWeights.root" )
+    arguments.add_argument( "--mc", default="mc.root"  )
+    arguments.add_argument( "--data", default="data.root" )
+    opts = arguments.parse_args()
 
-	s7Scenario = readHisto( opts.mc, "pileupScenarioS7" )
-	s10Scenario = readHisto( opts.mc, "pileupScenarioS10" )
+    dataHist = readHisto( opts.data, "pileup" )
+    dataHistUp = readHisto( opts.data, "pileupUp" )
+    dataHistDown = readHisto( opts.data, "pileupDown" )
 
-	dataHist = readHisto( opts.data, "pileup" )
-	dataHistUp = readHisto( opts.data, "pileupUp" )
-	dataHistDown = readHisto( opts.data, "pileupDown" )
+    for h in [ dataHist, dataHistUp, dataHistDown ]:
+        h.Scale( 1./h.Integral() )
 
-	for h in [ s7Scenario, s10Scenario, dataHist, dataHistUp, dataHistDown ]:
-		h.Scale( 1./h.Integral() )
 
-	pileupWeightS10 = dataHist.Clone( "pileupWeightS10" )
-	pileupWeightS10Up = dataHistUp.Clone( "pileupWeightUpS10" )
-	pileupWeightS10Down = dataHistDown.Clone( "pileupWeightDownS10" )
+    mcHistNames = getObjectNames( opts.mc )
 
-	for h in pileupWeightS10, pileupWeightS10Up, pileupWeightS10Down:
-		h.Divide( s10Scenario )
+    weightHists = []
 
-	pileupWeightS7 = dataHist.Clone( "pileupWeightS7" )
-	pileupWeightS7Up = dataHistUp.Clone( "pileupWeightUpS7" )
-	pileupWeightS7Down = dataHistDown.Clone( "pileupWeightDownS7" )
+    for hName in mcHistNames:
+        mcH = readHisto( opts.mc, hName )
+        mcH.Scale( 1./h.Integral() )
 
-	for h in pileupWeightS7, pileupWeightS7Up, pileupWeightS7Down:
-		h.Divide( s7Scenario )
+        pileupWeight = dataHist.Clone( "pileupWeight_"+hName )
+        pileupWeightUp = dataHistUp.Clone( "pileupWeightUp_"+hName )
+        pileupWeightDown = dataHistDown.Clone( "pileupWeightDown_"+hName )
 
-	from createMChist import writeObjectsToFile
-	writeObjectsToFile( [pileupWeightS7, pileupWeightS7Up, pileupWeightS7Down, pileupWeightS10, pileupWeightS10Up, pileupWeightS10Down ], opts.outputFilename )
+        for h in pileupWeight, pileupWeightUp, pileupWeightDown:
+            h.Divide( mcH )
+
+        weightHists.extend( [pileupWeight, pileupWeightUp, pileupWeightDown] )
+
+    from createMChist import writeObjectsToFile
+    writeObjectsToFile( weightHists, opts.outputFilename )
