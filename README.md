@@ -4,14 +4,14 @@
 Get CMSSW environment 74X
 
 ```
-cmsrel CMSSW_7_4_0
-cd CMSSW_7_4_0/src
+cmsrel CMSSW_7_4_5
+cd CMSSW_7_4_5/src/
 cmsenv
 ```
-Get and build egamma recipes
+Get and build egamma recipes (for MVA)
 
 ```
-git cms-merge-topic ikrav:egm_id_74X_v0
+git cms-merge-topic ikrav:egm_id_74X_v2
 scram b -j 8
 ```
 Get and build the TreeWriter
