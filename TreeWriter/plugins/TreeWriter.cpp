@@ -384,16 +384,28 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    tree::GenParticle trP;
    if (!isRealData_){
       for (const reco::GenParticle &genP: *prunedGenParticles){
-         trP.pdgId=genP.pdgId();
-         if (abs(trP.pdgId)==24){ // W+-
-            trP.someTestFloat=genP.numberOfDaughters();
-            // TODO rekursiv duch toechter gehen (bis != W), dann wirkliche toecher speichern
-            vGenParticles_.push_back(trP); // TODO remove
+         if (abs(genP.pdgId())==24){ // W+-
+
+           // Find out if this is an intermediate W (has a W as daughter)
+            bool intermediateW = false;
+            for( unsigned i=0; i<genP.numberOfDaughters(); i++ ) {
+               // change the bool to true if W as daughter
+               intermediateW |= abs(genP.daughter(i)->pdgId()) == 24;
+            }
+            if( intermediateW ) continue; // not interested in intermediated W
+
+            // Save both daughters of the W
+            for( unsigned i=0; i<genP.numberOfDaughters(); i++ ) {
+               trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
+               trP.pdgId = genP.daughter(i)->pdgId();
+               vGenParticles_.push_back(trP);
+            }
          }
          if (genP.status() != 1) continue; // only final state particles
          if (genP.pt() < 30)     continue;
          if (abs(trP.pdgId) == 11 || trP.pdgId == 22){ // e+-, photon
             trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
+            trP.pdgId = genP.pdgId();
             vGenParticles_.push_back(trP);
          }
       }
