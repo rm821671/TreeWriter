@@ -9,7 +9,12 @@ namespace tree
    struct Particle
    {
       TVector3 p;
-      float    someTestFloat=0.; // only for quick peeking
+      Float_t  someTestFloat=0.; // only for quick peeking
+   };
+
+   struct GenParticle: public Particle
+   {
+      Int_t pdgId=0;
    };
 
    struct Photon : public Particle
