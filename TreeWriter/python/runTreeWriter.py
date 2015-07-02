@@ -85,6 +85,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     photonMvaValuesMap = cms.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrigValues"),
                                     # met filters to apply
                                     metFilterNames=applyMetFilters,
+                                    phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
 )
 
@@ -94,6 +95,8 @@ process.TFileService = cms.Service("TFileService",fileName = cms.string('photonT
 ######################
 # PHOTONS, ELECTRONS #
 ######################
+from RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cfi import *
+
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 dataFormat = DataFormat.MiniAOD
 
@@ -116,4 +119,4 @@ for idmod in ph_id_modules:
 #     RUN          #
 ####################
 
-process.p = cms.Path(process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
+process.p = cms.Path(process.photonIDValueMapProducer * process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)

@@ -14,27 +14,25 @@ namespace tree
 
    struct Photon : public Particle
    {
-      // Variables for cut based ID
+      Float_t sigmaIetaIeta; // full 5x5
       Float_t hOverE;
       Int_t hasPixelSeed;
       Int_t passElectronVeto;
-
-      // Extra variables for MVA ID (excluding already mentioned above)
-      Float_t scRawEnergy;
       Float_t r9;
-      Float_t sigma_eta;
-      Float_t sigma_phi;
-      Float_t esEnergy;
 
-      Float_t mvaValue;
+      Float_t isoChargedHadronsEA;
+      Float_t isoNeutralHadronsEA;
+      Float_t isoPhotonsEA;
+      Float_t isoWorstChargedHadrons;
   
       Int_t isTrue;
       Int_t isTrueAlternative;
 
+      // IDs
       Bool_t  isLoose;
       Bool_t  isMedium;
       Bool_t  isTight;
-
+      Float_t mvaValue;
    };
 
    struct Jet : public Particle
@@ -75,8 +73,9 @@ namespace tree
       Float_t  uncertainty;
    };
 
-   bool EtGreater(const tree::Particle, const tree::Particle);
+   inline bool EtGreater(const tree::Particle p1, const tree::Particle p2) {
+      return p1.p.Pt() > p2.p.Pt();
+   }
 
 } // end namespace definition
-
 #endif /* TREEPARTICLES_H */

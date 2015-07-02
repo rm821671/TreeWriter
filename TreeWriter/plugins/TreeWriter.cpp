@@ -99,6 +99,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonMvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("photonMvaValuesMap")))
    // met filters to apply
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
+   , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
 {
 
@@ -253,6 +254,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (HT<dHT_cut_) return;
    hCutFlow_->Fill("HT",1);
 
+   edm::Handle<edm::ValueMap<float> > phoWorstChargedIsolationMap;
+   iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
+
    edm::Handle<edm::ValueMap<bool> > loose_id_dec;
    edm::Handle<edm::ValueMap<bool> > medium_id_dec;
    edm::Handle<edm::ValueMap<bool> > tight_id_dec;
@@ -270,18 +274,33 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          continue;
 
       trPho.p.SetPtEtaPhi(pho->pt(),pho->superCluster()->eta(),pho->superCluster()->phi());
-      trPho.scRawEnergy = pho->superCluster()->rawEnergy();
-      trPho.esEnergy    = pho->superCluster()->preshowerEnergy();
 
       const edm::Ptr<pat::Photon> phoPtr( photonColl, pho - photonColl->begin() );
 
+      trPho.sigmaIetaIeta=pho->full5x5_sigmaIetaIeta(); // from reco::Photon
       trPho.hOverE=pho->hadTowOverEm() ;
       trPho.hasPixelSeed=(Int_t)pho->hasPixelSeed() ;
       trPho.passElectronVeto= pho->passElectronVeto() ;
+      trPho.r9  = pho->r9();
 
-      trPho.sigma_eta             = pho->superCluster()->etaWidth();
-      trPho.sigma_phi             = pho->superCluster()->phiWidth();
-      trPho.r9                    = pho->r9();
+      trPho.isoChargedHadronsEA=pho->chargedHadronIso();
+      trPho.isoNeutralHadronsEA=pho->neutralHadronIso();
+      trPho.isoPhotonsEA       =pho->photonIso();
+      trPho.isoWorstChargedHadrons = (*phoWorstChargedIsolationMap)[phoPtr];
+
+      // Compute isolation with effective area correction for PU
+      // Find eta bin first. If eta>2.5, the last eta bin is used.
+      int etaBin = 0;
+      while ( etaBin < EffectiveAreas::nEtaBins-1
+              && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
+         ++etaBin;
+      };
+      trPho.isoPhotonsEA        = std::max(float(0.0), trPho.isoPhotonsEA
+                                           - rho_ * EffectiveAreas::areaPhotons[etaBin] );
+      trPho.isoNeutralHadronsEA = std::max(float(0.0), trPho.isoNeutralHadronsEA
+                                           - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
+      trPho.isoChargedHadronsEA = std::max(float(0.0), trPho.isoChargedHadronsEA
+                                           - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
