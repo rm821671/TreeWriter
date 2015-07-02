@@ -117,10 +117,13 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("isRealData"    , &isRealData_    , "isRealData/O");
    eventTree_->Branch("nPV"           , &nPV_           , "nPV/I");
    eventTree_->Branch("true_nPV"      , &true_nPV_      , "true_nPV/I");
-   eventTree_->Branch("pu_weight"     , &pu_weight      , "pu_weight/F");
    eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nGoodVertices/I");
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
+   eventTree_->Branch("pu_weight"     , &pu_weight_     , "pu_weight/F");
+   eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/F");
+
+   eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
 
    eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
@@ -390,10 +393,18 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 }
       }
       true_nPV_=Tnpv;
-      pu_weight=hPU_.GetBinContent(hPU_.FindBin(Tnpv));
+      pu_weight_=hPU_.GetBinContent(hPU_.FindBin(Tnpv));
    }else{ // real data
       true_nPV_=-1;
-      pu_weight=1.;
+      pu_weight_=1.;
+   }
+
+   // generator weights
+   mc_weight_=0.;
+   if (!isRealData_){
+      edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
+      iEvent.getByLabel("generator", GenEventInfoHandle);
+      mc_weight_=GenEventInfoHandle->weight();
    }
    
    hCutFlow_->Fill("final",1);

@@ -37,6 +37,7 @@
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
 
 #include <SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h>
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
@@ -133,9 +134,13 @@ private:
    Bool_t  isRealData_; // whether data or MC
    Int_t   nPV_;   // number of reconsrtucted primary vertices
    Int_t   true_nPV_;   // true number of reconsrtucted primary vertices
-   Float_t pu_weight; // pileup weight
    Int_t   nGoodVertices_;
    Float_t rho_;   // the rho variable
+
+   Float_t pu_weight_; // pileup weight
+   Float_t mc_weight_; // nlo monte carlo weight
+
+   Float_t dummyFloat_=0.;
 
    ULong64_t evtNo_;
    UInt_t    runNo_;
