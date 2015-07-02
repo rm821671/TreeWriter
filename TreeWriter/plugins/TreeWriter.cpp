@@ -23,10 +23,10 @@ static bool isLooseJet(const pat::Jet& jet)
    // additional forward requirements:
    if (fabs(jet.eta()) > 2.4){
       pass = pass
-	 && jet.chargedHadronEnergyFraction() > 0
-	 && jet.chargedMultiplicity()         > 0
-	 && jet.chargedEmEnergyFraction()     < .99
-	 ;
+         && jet.chargedHadronEnergyFraction() > 0
+         && jet.chargedMultiplicity()         > 0
+         && jet.chargedEmEnergyFraction()     < .99
+         ;
    }
    return pass;
 }
@@ -199,17 +199,17 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    reco::VertexCollection::const_iterator firstGoodVertex = vertices->end();
    nGoodVertices_=0;
    for (reco::VertexCollection::const_iterator vtx = vertices->begin();
-	vtx != vertices->end(); ++vtx) {
+        vtx != vertices->end(); ++vtx) {
       // Replace isFake() for miniAOD because it requires tracks and miniAOD vertices don't have tracks:
       // Vertex.h: bool isFake() const {return (chi2_==0 && ndof_==0 && tracks_.empty());}
       if (  /*!vtx->isFake() &&*/
-	 !(vtx->chi2()==0 && vtx->ndof()==0)
-	 &&  vtx->ndof()>=4. && vtx->position().Rho()<=2.0
-	 && fabs(vtx->position().Z())<=24.0)
+         !(vtx->chi2()==0 && vtx->ndof()==0)
+         &&  vtx->ndof()>=4. && vtx->position().Rho()<=2.0
+         && fabs(vtx->position().Z())<=24.0)
       {
-	 nGoodVertices_++;
-	 // first one?
-	 if (nGoodVertices_==1) firstGoodVertex = vtx;
+         nGoodVertices_++;
+         // first one?
+         if (nGoodVertices_==1) firstGoodVertex = vtx;
       }
    }
 
@@ -267,7 +267,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    for(edm::View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
       // Kinematics
       if( pho->pt() < 15 )
-	 continue;
+         continue;
 
       trPho.p.SetPtEtaPhi(pho->pt(),pho->superCluster()->eta(),pho->superCluster()->phi());
       trPho.scRawEnergy = pho->superCluster()->rawEnergy();
@@ -287,11 +287,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // MC match
       if (!isRealData_){
-	 trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
-	 trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
+         trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
+         trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
       }else{
-	 trPho.isTrue=           UNMATCHED;
-	 trPho.isTrueAlternative=UNMATCHED;
+         trPho.isTrue=           UNMATCHED;
+         trPho.isTrueAlternative=UNMATCHED;
       }
 
       // check photon working points
@@ -367,15 +367,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    tree::Particle trP;
    if (!isRealData_){
       for (const reco::GenParticle &genP: *prunedGenParticles){
-	 if (genP.status() != 1) continue; // only final state particles
-	 if (genP.pt() < 30)     continue;
-	 if (abs(genP.pdgId()) == 11){ // electron
-	    trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
-	    vGenElectrons_.push_back(trP);
-	 } else if (genP.pdgId() == 22){ // photon
-	    trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
-	    vGenPhotons_.push_back(trP);
-	 }
+         if (genP.status() != 1) continue; // only final state particles
+         if (genP.pt() < 30)     continue;
+         if (abs(genP.pdgId()) == 11){ // electron
+            trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
+            vGenElectrons_.push_back(trP);
+         } else if (genP.pdgId() == 22){ // photon
+            trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
+            vGenPhotons_.push_back(trP);
+         }
       }
    }
 
@@ -386,11 +386,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       std::vector<PileupSummaryInfo>::const_iterator PVI;
       float Tnpv = -1;
       for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
-	 int BX = PVI->getBunchCrossing();
-	 if(BX == 0) {
-	    Tnpv = PVI->getTrueNumInteractions();
-	    continue;
-	 }
+         int BX = PVI->getBunchCrossing();
+         if(BX == 0) {
+            Tnpv = PVI->getTrueNumInteractions();
+            continue;
+         }
       }
       true_nPV_=Tnpv;
       pu_weight_=hPU_.GetBinContent(hPU_.FindBin(Tnpv));
@@ -472,8 +472,8 @@ TreeWriter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 }
 
 int TreeWriter::matchToTruth(const pat::Photon &pho,
-					      const edm::Handle<edm::View<reco::GenParticle>>
-					      &genParticles)
+                                              const edm::Handle<edm::View<reco::GenParticle>>
+                                              &genParticles)
 {
    //
    // Explicit loop and geometric matching method
@@ -486,12 +486,12 @@ int TreeWriter::matchToTruth(const pat::Photon &pho,
       const reco::Candidate *particle = &(*genParticles)[i];
       // Drop everything that is not photon or not status 1
       if( abs(particle->pdgId()) != 22 || particle->status() != 1 )
-	 continue;
+         continue;
       //
       double dRtmp = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle->p4() );
       if( dRtmp < dR ){
-	 dR = dRtmp;
-	 closestPhoton = particle;
+         dR = dRtmp;
+         closestPhoton = particle;
       }
    }
    // See if the closest photon (if it exists) is close enough.
@@ -508,20 +508,20 @@ int TreeWriter::matchToTruth(const pat::Photon &pho,
    // Allowed parens: quarks pdgId 1-5, or a gluon 21
    std::vector<int> allowedParents { -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -21, 21 };
    if( !(std::find(allowedParents.begin(),
-		   allowedParents.end(), ancestorPID)
-	 != allowedParents.end()) ){
+                   allowedParents.end(), ancestorPID)
+         != allowedParents.end()) ){
       // So it is not from g, u, d, s, c, b. Check if it is from pi0 or not.
       if( abs(ancestorPID) == 111 )
-	 return MATCHED_FROM_PI0;
+         return MATCHED_FROM_PI0;
       else
-	 return MATCHED_FROM_OTHER_SOURCES;
+         return MATCHED_FROM_OTHER_SOURCES;
    }
    return MATCHED_FROM_GUDSCB;
 
 }
 
 void TreeWriter::findFirstNonPhotonMother(const reco::Candidate *particle,
-							   int &ancestorPID, int &ancestorStatus){
+                                                           int &ancestorPID, int &ancestorStatus){
 
    if( particle == 0 ){
       printf("TreeWriter: ERROR! null candidate pointer, this should never happen\n");
@@ -541,8 +541,8 @@ void TreeWriter::findFirstNonPhotonMother(const reco::Candidate *particle,
 }
 
 int TreeWriter::matchToTruthAlternative(const pat::Photon &pho,
-							 const edm::Handle<edm::View<reco::GenParticle>>
-							 &genParticles)
+                                                         const edm::Handle<edm::View<reco::GenParticle>>
+                                                         &genParticles)
 {
 
 
@@ -559,14 +559,14 @@ int TreeWriter::matchToTruthAlternative(const pat::Photon &pho,
       int ancestorStatus = -999;
       findFirstNonPhotonMother(particle, ancestorPID, ancestorStatus);
       if( pid ==22 && TMath::Abs( ancestorPID ) <= 22 ){
-	 double dr = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle->p4() );
-	 float dpt = fabs( (pho.pt() - particle->pt() )/particle->pt());
-	 if (dr < 0.2 && dpt < 0.2){
-	    isMatched = MATCHED_FROM_GUDSCB;
-	    if( ancestorPID == 22 ){
-	       printf("Ancestor of a photon is a photon!\n");
-	    }
-	 }
+         double dr = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle->p4() );
+         float dpt = fabs( (pho.pt() - particle->pt() )/particle->pt());
+         if (dr < 0.2 && dpt < 0.2){
+            isMatched = MATCHED_FROM_GUDSCB;
+            if( ancestorPID == 22 ){
+               printf("Ancestor of a photon is a photon!\n");
+            }
+         }
       }
    }
 
