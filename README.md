@@ -8,7 +8,7 @@ cmsrel CMSSW_7_4_5
 cd CMSSW_7_4_5/src/
 cmsenv
 ```
-Get and build egamma recipes (for MVA)
+Get and build egamma recipes (for MVA and photon id value map producer)
 
 ```
 git cms-merge-topic ikrav:egm_id_74X_v2

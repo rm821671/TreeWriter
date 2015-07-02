@@ -99,6 +99,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonMvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("photonMvaValuesMap")))
    // met filters to apply
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
+   , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
 {
 
@@ -252,6 +253,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    double const HT=computeHT(vJets_);
    if (HT<dHT_cut_) return;
    hCutFlow_->Fill("HT",1);
+
+   edm::Handle<edm::ValueMap<float> > phoWorstChargedIsolationMap;
+   iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
 
    edm::Handle<edm::ValueMap<bool> > loose_id_dec;
    edm::Handle<edm::ValueMap<bool> > medium_id_dec;
