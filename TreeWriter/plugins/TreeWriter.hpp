@@ -144,7 +144,8 @@ private:
    std::vector<tree::Muon>     vMuons_;
    tree::MET                   met_;
    std::vector<tree::Particle> vGenPhotons_;
-   std::vector<tree::Particle> vGenElectrons_;
+
+   std::vector<tree::GenParticle> vGenParticles_;
    // === ========  ===
 
    // histogram to store #evts after each "cut"
