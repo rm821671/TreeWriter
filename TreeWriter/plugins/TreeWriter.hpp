@@ -120,6 +120,7 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > photonLooseIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<float>> photonMvaValuesMapToken_;
 
    // met filters to apply
    const std::vector<std::string> metFilterNames_;
@@ -153,35 +154,6 @@ private:
 
    // histogram to store #evts after each "cut"
    TH1F* hCutFlow_;
-
-
-   // === VARIABLES NOT STORED IN TREE ===
-   // Variables that will be containers on which TMVA Reader works
-   // The variables
-   float varPhi_;
-   float varR9_; 
-   float varSieie_;
-   float varSieip_; 
-   float varE1x3overE5x5_; 
-   float varE2x2overE5x5_; 
-   float varE2x5overE5x5_; 
-   float varSCEta_; 
-   float varRawE_; 
-   float varSCEtaWidth_; 
-   float varSCPhiWidth_; 
-   float varRho_;
-   float varPhoIsoRaw_;
-   float varChIsoRaw_; 
-   float varWorstChRaw_;
-   float varESEnOverRawE_; // for endcap MVA only
-   float varESEffSigmaRR_; // for endcap MVA only
-   // The spectators
-   float varPt_; 
-   float varEta_;
-
-   // TMVA Reader for applying MVA
-   TMVA::Reader *tmvaReader_[2];
-   TString methodName_[2];
 
    // Pileup histogram(s)
    TH1F hPU_;

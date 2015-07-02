@@ -15,31 +15,15 @@ namespace tree
    struct Photon : public Particle
    {
       // Variables for cut based ID
-      Float_t full5x5_sigmaIetaIeta;
       Float_t hOverE;
       Int_t hasPixelSeed;
       Int_t passElectronVeto;
 
-      Float_t isoChargedHadrons;
-      Float_t isoNeutralHadrons;
-      Float_t isoPhotons;
-
-      Float_t isoChargedHadronsWithEA;
-      Float_t isoNeutralHadronsWithEA;
-      Float_t isoPhotonsWithEA;
-
       // Extra variables for MVA ID (excluding already mentioned above)
       Float_t scRawEnergy;
-      Float_t isoWorstChargedHadrons;
       Float_t r9;
-      Float_t full5x5_sigmaIetaIphi;
-      Float_t full5x5_e1x3;
-      Float_t full5x5_e2x2;
-      Float_t full5x5_e2x5Max;
-      Float_t full5x5_e5x5;
       Float_t sigma_eta;
       Float_t sigma_phi;
-      Float_t esEffSigmaRR;
       Float_t esEnergy;
 
       Float_t mvaValue;
