@@ -273,6 +273,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       const edm::Ptr<pat::Photon> phoPtr( photonColl, pho - photonColl->begin() );
 
+      trPho.sigmaIetaIeta=pho->full5x5_sigmaIetaIeta(); // from reco::Photon
       trPho.hOverE=pho->hadTowOverEm() ;
       trPho.hasPixelSeed=(Int_t)pho->hasPixelSeed() ;
       trPho.passElectronVeto= pho->passElectronVeto() ;
