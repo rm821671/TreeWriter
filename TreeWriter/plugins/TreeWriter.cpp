@@ -385,6 +385,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (!isRealData_){
       for (const reco::GenParticle &genP: *prunedGenParticles){
          trP.pdgId=genP.pdgId();
+         if (abs(trP.pdgId)==24){ // W+-
+            trP.someTestFloat=genP.numberOfDaughters();
+            // TODO rekursiv duch toechter gehen (bis != W), dann wirkliche toecher speichern
+            vGenParticles_.push_back(trP); // TODO remove
+         }
          if (genP.status() != 1) continue; // only final state particles
          if (genP.pt() < 30)     continue;
          if (abs(trP.pdgId) == 11 || trP.pdgId == 22){ // e+-, photon
