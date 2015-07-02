@@ -75,8 +75,9 @@ namespace tree
       Float_t  uncertainty;
    };
 
-   bool EtGreater(const tree::Particle, const tree::Particle);
+   inline bool EtGreater(const tree::Particle p1, const tree::Particle p2) {
+      return p1.p.Pt() > p2.p.Pt();
+   }
 
 } // end namespace definition
-
 #endif /* TREEPARTICLES_H */
