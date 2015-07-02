@@ -23,6 +23,7 @@ namespace tree
       Float_t isoChargedHadronsEA;
       Float_t isoNeutralHadronsEA;
       Float_t isoPhotonsEA;
+      Float_t isoWorstChargedHadrons;
   
       Int_t isTrue;
       Int_t isTrueAlternative;

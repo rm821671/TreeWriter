@@ -286,6 +286,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isoChargedHadronsEA=pho->chargedHadronIso();
       trPho.isoNeutralHadronsEA=pho->neutralHadronIso();
       trPho.isoPhotonsEA       =pho->photonIso();
+      trPho.isoWorstChargedHadrons = (*phoWorstChargedIsolationMap)[phoPtr];
 
       // Compute isolation with effective area correction for PU
       // Find eta bin first. If eta>2.5, the last eta bin is used.
