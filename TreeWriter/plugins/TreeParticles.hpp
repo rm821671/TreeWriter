@@ -18,8 +18,11 @@ namespace tree
       Float_t hOverE;
       Int_t hasPixelSeed;
       Int_t passElectronVeto;
-
       Float_t r9;
+
+      Float_t isoChargedHadronsEA;
+      Float_t isoNeutralHadronsEA;
+      Float_t isoPhotonsEA;
   
       Int_t isTrue;
       Int_t isTrueAlternative;

@@ -277,8 +277,25 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.hOverE=pho->hadTowOverEm() ;
       trPho.hasPixelSeed=(Int_t)pho->hasPixelSeed() ;
       trPho.passElectronVeto= pho->passElectronVeto() ;
-
       trPho.r9  = pho->r9();
+
+      trPho.isoChargedHadronsEA=pho->chargedHadronIso();
+      trPho.isoNeutralHadronsEA=pho->neutralHadronIso();
+      trPho.isoPhotonsEA       =pho->photonIso();
+
+      // Compute isolation with effective area correction for PU
+      // Find eta bin first. If eta>2.5, the last eta bin is used.
+      int etaBin = 0;
+      while ( etaBin < EffectiveAreas::nEtaBins-1
+              && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
+         ++etaBin;
+      };
+      trPho.isoPhotonsEA        = std::max(float(0.0), trPho.isoPhotonsEA
+                                           - rho_ * EffectiveAreas::areaPhotons[etaBin] );
+      trPho.isoNeutralHadronsEA = std::max(float(0.0), trPho.isoNeutralHadronsEA
+                                           - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
+      trPho.isoChargedHadronsEA = std::max(float(0.0), trPho.isoChargedHadronsEA
+                                           - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
