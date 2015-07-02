@@ -112,8 +112,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("electrons", &vElectrons_);
    eventTree_->Branch("muons"    , &vMuons_);
    eventTree_->Branch("met"      , &met_);
-   eventTree_->Branch("genPhotons"   , &vGenPhotons_);
-   eventTree_->Branch("genElectrons" , &vGenElectrons_);
+   eventTree_->Branch("genParticles", &vGenParticles_);
 
    eventTree_->Branch("isRealData"    , &isRealData_    , "isRealData/O");
    eventTree_->Branch("nPV"           , &nPV_           , "nPV/I");
@@ -381,19 +380,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    met_.uncertainty=TMath::Sqrt(met_.uncertainty);
 
    // Generated Particles
-   vGenPhotons_  .clear();
-   vGenElectrons_.clear();
-   tree::Particle trP;
+   vGenParticles_.clear();
+   tree::GenParticle trP;
    if (!isRealData_){
       for (const reco::GenParticle &genP: *prunedGenParticles){
+         trP.pdgId=genP.pdgId();
          if (genP.status() != 1) continue; // only final state particles
          if (genP.pt() < 30)     continue;
-         if (abs(genP.pdgId()) == 11){ // electron
+         if (abs(trP.pdgId) == 11 || trP.pdgId == 22){ // e+-, photon
             trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
-            vGenElectrons_.push_back(trP);
-         } else if (genP.pdgId() == 22){ // photon
-            trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
-            vGenPhotons_.push_back(trP);
+            vGenParticles_.push_back(trP);
          }
       }
    }
