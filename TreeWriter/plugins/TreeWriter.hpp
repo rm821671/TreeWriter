@@ -98,19 +98,6 @@ private:
    edm::EDGetTokenT<pat::METCollection>        metCollectionToken_;
    edm::EDGetTokenT<double>                    rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
-   // Value maps with various quantities produced upstream (for photon id)
-   edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMapToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIPhiMapToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > full5x5E1x3MapToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > full5x5E2x2MapToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > full5x5E2x5MaxMapToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > full5x5E5x5MapToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > esEffSigmaRRMapToken_; 
-   //
-   edm::EDGetTokenT<edm::ValueMap<float> > phoChargedIsolationToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > phoNeutralHadronIsolationToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > phoPhotonIsolationToken_; 
-   edm::EDGetTokenT<edm::ValueMap<float> > phoWorstChargedIsolationToken_; 
 
    // electron id
    edm::EDGetTokenT<edm::ValueMap<bool> > electronVetoIdMapToken_;
@@ -125,6 +112,9 @@ private:
 
    // met filters to apply
    const std::vector<std::string> metFilterNames_;
+
+   // from photon ID value map producer
+   edm::EDGetTokenT<edm::ValueMap<float> > phoWorstChargedIsolationToken_;
 
    const std::string pileupHistogramName_;
 
