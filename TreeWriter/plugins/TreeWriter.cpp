@@ -270,8 +270,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          continue;
 
       trPho.p.SetPtEtaPhi(pho->pt(),pho->superCluster()->eta(),pho->superCluster()->phi());
-      trPho.scRawEnergy = pho->superCluster()->rawEnergy();
-      trPho.esEnergy    = pho->superCluster()->preshowerEnergy();
 
       const edm::Ptr<pat::Photon> phoPtr( photonColl, pho - photonColl->begin() );
 
@@ -279,9 +277,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.hasPixelSeed=(Int_t)pho->hasPixelSeed() ;
       trPho.passElectronVeto= pho->passElectronVeto() ;
 
-      trPho.sigma_eta             = pho->superCluster()->etaWidth();
-      trPho.sigma_phi             = pho->superCluster()->phiWidth();
-      trPho.r9                    = pho->r9();
+      trPho.r9  = pho->r9();
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
