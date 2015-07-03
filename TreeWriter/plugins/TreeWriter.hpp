@@ -136,6 +136,11 @@ private:
    UInt_t    runNo_;
    UInt_t    lumNo_;
 
+   // Trigger decisions
+   std::vector<std::string> triggerNames_;
+   std::map<std::string, Bool_t > triggerDecision_;
+   std::map<std::string, int > triggerIndex_;
+
    // physics Objects
    std::vector<tree::Photon>   vPhotons_;
    std::vector<tree::Jet>      vJets_;

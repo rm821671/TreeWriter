@@ -101,6 +101,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
+   , triggerNames_(iConfig.getParameter<std::vector<std::string>>("triggerNames"))
 {
 
    edm::Service<TFileService> fs;
@@ -128,6 +129,15 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
    eventTree_->Branch("lumNo", &lumNo_, "lumNo/i");
+
+   // Fill trigger maps
+   for( auto& n : triggerNames_ ){
+      triggerIndex_[n] = -10; // not set and not found
+      triggerDecision_[n] = false;
+      eventTree_->Branch( n.c_str(), &triggerDecision_[n], (n+"/O").c_str() );
+   }
+
+
 
    // get pileup histogram(s)
    std::string cmssw_base_src = getenv("CMSSW_BASE");
@@ -160,6 +170,33 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    hCutFlow_->Fill("initial",1);
    isRealData_=iEvent.isRealData();
+
+
+   edm::Handle<edm::TriggerResults> triggerBits;
+   edm::InputTag triggerTag("TriggerResults","","HLT");
+   iEvent.getByLabel(triggerTag, triggerBits);
+
+   // trigger indices not set yet (ususally first event)
+   if( triggerIndex_.size() && triggerIndex_.begin()->second == -10 ) {
+
+      // set all trigger indeces to -1 to avoid looping a second time
+      for( auto& it : triggerIndex_ )
+        it.second = -1;
+
+      const edm::TriggerNames &triggerNames = iEvent.triggerNames(*triggerBits);
+      for( unsigned i=0; i<triggerNames.size(); i++ ) {
+         for( auto& it : triggerIndex_ ) {
+            if( triggerNames.triggerName(i).find( it.first ) == 0 ) {
+               it.second = i;
+            }
+         }
+      } // end trigger names
+   } // found indices
+
+   // set trigger decision
+   for( auto& it : triggerIndex_ ) {
+     triggerDecision_[it.first] = triggerBits->accept( it.second );
+   }
 
    // MET Filters
    edm::Handle<edm::TriggerResults> metFilterBits;
@@ -378,7 +415,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       met_.uncertainty+=a*a;
    }
    met_.uncertainty=TMath::Sqrt(met_.uncertainty);
-
    // Generated Particles
    vGenParticles_.clear();
    tree::GenParticle trP;
@@ -396,7 +432,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             // Save both daughters of the W
             for( unsigned i=0; i<genP.numberOfDaughters(); i++ ) {
-               trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
+               trP.p.SetPtEtaPhi(genP.daughter(i)->pt(),genP.daughter(i)->eta(),genP.daughter(i)->phi());
                trP.pdgId = genP.daughter(i)->pdgId();
                vGenParticles_.push_back(trP);
             }

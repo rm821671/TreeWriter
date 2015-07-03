@@ -87,6 +87,10 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     metFilterNames=applyMetFilters,
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
+                                    # triggers to be saved
+                                    # Warning: To be independent of the version number, the trigger result is saved if the trigger name begins
+                                    # with the strings given here. E.g. "HLT" would always be true if any of the triggers fired.
+                                    triggerNames=cms.vstring( "HLT_Photon90_CaloIdL_PFHT500_v","HLT_Photon90_v", "HLT_PFHT600_v" ),
 )
 
 process.TFileService = cms.Service("TFileService",fileName = cms.string('photonTree.root'))
