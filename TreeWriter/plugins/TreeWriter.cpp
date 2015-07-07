@@ -439,9 +439,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          }
          if (genP.status() != 1) continue; // only final state particles
          if (genP.pt() < 30)     continue;
+         trP.pdgId = genP.pdgId();
          if (abs(trP.pdgId) == 11 || trP.pdgId == 22){ // e+-, photon
             trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
-            trP.pdgId = genP.pdgId();
             vGenParticles_.push_back(trP);
          }
       }
