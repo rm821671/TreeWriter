@@ -270,7 +270,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
-      trJet.bDiscriminator=jet.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
+      trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
       trJet.someTestFloat=jet.chargedEmEnergyFraction();
       trJet.isLoose=isLooseJet(jet);
       vJets_.push_back(trJet);
@@ -474,7 +474,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       iEvent.getByLabel("generator", GenEventInfoHandle);
       mc_weight_=GenEventInfoHandle->weight();
    }
-   
+
    hCutFlow_->Fill("final",1);
    // store event identity
    evtNo_=iEvent.id().event();
