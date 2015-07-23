@@ -4,7 +4,7 @@
 #include <TLorentzVector.h>
 #include <TVector3.h>
 
-namespace tree 
+namespace tree
 {
    struct Particle
    {
@@ -29,7 +29,7 @@ namespace tree
       Float_t isoNeutralHadronsEA;
       Float_t isoPhotonsEA;
       Float_t isoWorstChargedHadrons;
-  
+
       Int_t isTrue;
       Int_t isTrueAlternative;
 
@@ -45,20 +45,6 @@ namespace tree
       bool isLoose;
       float bDiscriminator;
    };
-   // struct Jet : public Particle{
-   // public:
-   //    float bCSV;
-   //    float chargedHadronEnergy,
-   // 	 neutralHadronEnergy,
-   // 	 photonEnergy,
-   // 	 electronEnergy,
-   // 	 muonEnergy,
-   // 	 HFHadronEnergy,
-   // 	 HFEMEnergy,
-   // 	 chargedEmEnergy,
-   // 	 chargedMuEnergy,
-   // 	 neutralEmEnergy;
-   // };
 
    struct Muon: public Particle
    {

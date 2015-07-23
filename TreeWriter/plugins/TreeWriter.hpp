@@ -62,11 +62,11 @@ public:
 
    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-   enum PhotonMatchType {UNMATCHED = 0, 
-			 MATCHED_FROM_GUDSCB,
-			 MATCHED_FROM_PI0,
-			 MATCHED_FROM_OTHER_SOURCES};
-  
+   enum PhotonMatchType {UNMATCHED = 0,
+                         MATCHED_FROM_GUDSCB,
+                         MATCHED_FROM_PI0,
+                         MATCHED_FROM_OTHER_SOURCES};
+
 private:
    virtual void beginJob() override;
    virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
@@ -77,13 +77,13 @@ private:
    //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
    //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
-   int matchToTruth(const pat::Photon &pho, 
-		    const edm::Handle<edm::View<reco::GenParticle>>  &genParticles);
-   int matchToTruthAlternative(const pat::Photon &pho, 
-			       const edm::Handle<edm::View<reco::GenParticle>>  &genParticles);
+   int matchToTruth(const pat::Photon &pho,
+                    const edm::Handle<edm::View<reco::GenParticle>>  &genParticles);
+   int matchToTruthAlternative(const pat::Photon &pho,
+                               const edm::Handle<edm::View<reco::GenParticle>>  &genParticles);
 
    void findFirstNonPhotonMother(const reco::Candidate *particle,
-				 int &ancestorPID, int &ancestorStatus);
+                                 int &ancestorPID, int &ancestorStatus);
 
    // ----------member data ---------------------------
    double dHT_cut_;
