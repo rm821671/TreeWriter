@@ -62,10 +62,17 @@ if False:
 # (see https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015#ETmiss_filters)
 applyMetFilters.extend([
     "Flag_CSCTightHaloFilter",
-    "Flag_HBHENoiseFilter",
+    # "Flag_HBHENoiseFilter",
     "Flag_goodVertices",
 ])
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 
+process.ApplyBaselineHBHENoiseFilter = cms.EDFilter(
+    'BooleanFlagFilter',
+    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+    reverseDecision = cms.bool(False)
+)
 
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
@@ -133,4 +140,11 @@ for idmod in ph_id_modules:
 #     RUN          #
 ####################
 
-process.p = cms.Path(process.photonIDValueMapProducer * process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
+process.p = cms.Path(
+    process.photonIDValueMapProducer
+    *process.egmGsfElectronIDSequence
+    *process.egmPhotonIDSequence
+    *process.HBHENoiseFilterResultProducer #produces HBHE bools
+    *process.ApplyBaselineHBHENoiseFilter  #reject events based
+    *process.TreeWriter
+)
