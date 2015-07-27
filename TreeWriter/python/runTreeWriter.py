@@ -40,9 +40,10 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
     # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
 ))
 
-#
-# Define MET Filters to apply
-#
+
+###############################
+# Define MET Filters to apply #
+###############################
 applyMetFilters=cms.untracked.vstring()
 # 8 TeV filters: obviously not yet tuned for 13TeV (See HBHE comment). Use them later.
 if False:
@@ -57,23 +58,32 @@ if False:
         "Flag_trkPOG_toomanystripclus53X"
     ])
 # recommended (27-07-15)
-# TODO: HBEHE has to be manually re-run for early data
 # process name (see analyzer code) is "PAT", but "RECO" for "Run2015B PromptReco Data"
 # (see https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015#ETmiss_filters)
 applyMetFilters.extend([
     "Flag_CSCTightHaloFilter",
-    # "Flag_HBHENoiseFilter",
+    # "Flag_HBHENoiseFilter", # apply manually, see below
     "Flag_goodVertices",
 ])
+# HBHE has to be manually re-run for early data
+# for now, the events are removed before the actual TreeWriter is run, so they
+# don't contribute in the CutFlow histogram to the "MET Filter" bin, but are already
+# missing in "initial"
 process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 
 process.ApplyBaselineHBHENoiseFilter = cms.EDFilter(
     'BooleanFlagFilter',
-    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+    # "Run2Tight" for 25ns. Normally this should be set automatically by eras module, but it
+    # does not work somehow. (Setting Run2Loose here yields the same results, so the the
+    # automatic setting seems to use a run1 configuration.)
+    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
     reverseDecision = cms.bool(False)
 )
 
+################################
+# The actual TreeWriter module #
+################################
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
                                     HT_cut=cms.untracked.double(200.),
