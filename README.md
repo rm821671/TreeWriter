@@ -64,6 +64,3 @@ in the python config, set
 - genJets collection is stored (= full slimmedGenJets)
 - gen[Electrons|Photons]: status=1, pT>30
 - Decay products (daughters) of W bosons
-
-# TODO #
-Replace the MVA-ID by official recipe when available.
