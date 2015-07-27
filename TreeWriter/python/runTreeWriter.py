@@ -33,17 +33,19 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
     # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTbarDMJets_scalar_Mchi-50_Mphi-500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/70000/02EEF922-DC0C-E511-A09E-002618943940.root'
     # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/GJet_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v1/60000/02FC90C1-4A05-E511-9282-0025905521B2.root',
     # ttbar jan uses
-    'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root',
+    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root',
+    '/store/mc/RunIISpring15DR74/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/00BA540A-5618-E511-9D04-A0369F3102F6.root',
 
     # Run from a local file
     # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
 ))
 
-#
-# Define MET Filters to apply
-#
+
+###############################
+# Define MET Filters to apply #
+###############################
 applyMetFilters=cms.untracked.vstring()
-# TODO: obviously not yet tuned for 13TeV (See HBHE comment). Use them later.
+# 8 TeV filters: obviously not yet tuned for 13TeV (See HBHE comment). Use them later.
 if False:
     applyMetFilters.extend([
         "Flag_CSCTightHaloFilter",
@@ -55,8 +57,33 @@ if False:
         # "Flag_ecalLaserCorrFilter", # only for some rereco
         "Flag_trkPOG_toomanystripclus53X"
     ])
+# recommended (27-07-15)
+# process name (see analyzer code) is "PAT", but "RECO" for "Run2015B PromptReco Data"
+# (see https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015#ETmiss_filters)
+applyMetFilters.extend([
+    "Flag_CSCTightHaloFilter",
+    # "Flag_HBHENoiseFilter", # apply manually, see below
+    "Flag_goodVertices",
+])
+# HBHE has to be manually re-run for early data
+# for now, the events are removed before the actual TreeWriter is run, so they
+# don't contribute in the CutFlow histogram to the "MET Filter" bin, but are already
+# missing in "initial"
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 
+process.ApplyBaselineHBHENoiseFilter = cms.EDFilter(
+    'BooleanFlagFilter',
+    # "Run2Tight" for 25ns. Normally this should be set automatically by eras module, but it
+    # does not work somehow. (Setting Run2Loose here yields the same results, so the the
+    # automatic setting seems to use a run1 configuration.)
+    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
+    reverseDecision = cms.bool(False)
+)
 
+################################
+# The actual TreeWriter module #
+################################
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
                                     HT_cut=cms.untracked.double(200.),
@@ -123,4 +150,11 @@ for idmod in ph_id_modules:
 #     RUN          #
 ####################
 
-process.p = cms.Path(process.photonIDValueMapProducer * process.egmGsfElectronIDSequence * process.egmPhotonIDSequence * process.TreeWriter)
+process.p = cms.Path(
+    process.photonIDValueMapProducer
+    *process.egmGsfElectronIDSequence
+    *process.egmPhotonIDSequence
+    *process.HBHENoiseFilterResultProducer #produces HBHE bools
+    *process.ApplyBaselineHBHENoiseFilter  #reject events based
+    *process.TreeWriter
+)
