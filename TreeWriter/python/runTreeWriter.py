@@ -1,4 +1,15 @@
 import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.VarParsing as VarParsing
+
+options = VarParsing.VarParsing ('analysis')
+
+# setup any defaults you want
+options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root'
+options.outputFile = 'photonTree.root'
+options.maxEvents = -1
+
+# get and parse the command line arguments
+options.parseArguments()
 
 process = cms.Process("TreeWriter")
 
@@ -20,23 +31,9 @@ process.GlobalTag.globaltag = 'MCRUN2_74_V9::All'
 #
 # Define input data to read
 #
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( options.maxEvents ) )
 process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
-    # Just a handful of files from the dataset are listed below, for testing
-    # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/101611CC-026E-E411-B8D7-00266CFFBF88.root',
-    # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/DYJetsToLL_M-50_13TeV-madgraph-pythia8/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/0432E62A-7A6C-E411-87BB-002590DB92A8.root'
-    # 'root://xrootd-cms.infn.it///store/mc/Phys14DR/GJet_Pt40_doubleEMEnriched_TuneZ2star_13TeV-pythia6/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/1024D6DB-7D6F-E411-AE1D-00266CFF0608.root',
-    # 'root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00D3EAF1-3174-E411-A5B2-0025904B144E.root'
-    # 740 sample
-    # 'root://xrootd-cms.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/143E401F-4103-E511-85AC-B083FED0FFCF.root',
-    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v2/60000/00EFF2EE-E60B-E511-B422-B499BAAC0A22.root',
-    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTbarDMJets_scalar_Mchi-50_Mphi-500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/70000/02EEF922-DC0C-E511-A09E-002618943940.root'
-    # 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/GJet_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCUETP8M1_13TeV_Pythia8/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v1/60000/02FC90C1-4A05-E511-9282-0025905521B2.root',
-    # ttbar jan uses
-    'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root',
-
-    # Run from a local file
-    # 'file:/afs/cern.ch/user/j/jolange/private/data/minoAOD/singleElectron/964E27EF-9B5A-E411-8E30-0026189438FD.root'
+    options.inputFiles
 ))
 
 #
@@ -93,7 +90,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     triggerNames=cms.vstring( "HLT_Photon90_CaloIdL_PFHT500_v","HLT_Photon90_v", "HLT_PFHT600_v" ),
 )
 
-process.TFileService = cms.Service("TFileService",fileName = cms.string('photonTree.root'))
+process.TFileService = cms.Service("TFileService",fileName = cms.string(options.outputFile))
 
 
 ######################
