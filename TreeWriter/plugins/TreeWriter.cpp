@@ -131,7 +131,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("lumNo", &lumNo_, "lumNo/i");
 
    // Fill trigger maps
-   for( auto& n : triggerNames_ ){
+   for( const auto& n : triggerNames_ ){
       triggerIndex_[n] = -10; // not set and not found
       triggerDecision_[n] = false;
       eventTree_->Branch( n.c_str(), &triggerDecision_[n], (n+"/O").c_str() );
@@ -463,12 +463,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (!isRealData_){
       edm::Handle<std::vector< PileupSummaryInfo > >  PupInfo;
       iEvent.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
-      std::vector<PileupSummaryInfo>::const_iterator PVI;
       float Tnpv = -1;
-      for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
-         int BX = PVI->getBunchCrossing();
+      for( auto const& PVI: *PupInfo ) {
+         int BX = PVI.getBunchCrossing();
          if(BX == 0) {
-            Tnpv = PVI->getTrueNumInteractions();
+            Tnpv = PVI.getTrueNumInteractions();
             continue;
          }
       }
@@ -562,16 +561,15 @@ int TreeWriter::matchToTruth(const pat::Photon &pho,
    // Find the closest status 1 gen photon to the reco photon
    double dR = 999;
    const reco::Candidate *closestPhoton = 0;
-   for(size_t i=0; i<genParticles->size();i++){
-      const reco::Candidate *particle = &(*genParticles)[i];
+   for( auto const& particle: *genParticles ){
       // Drop everything that is not photon or not status 1
-      if( abs(particle->pdgId()) != 22 || particle->status() != 1 )
+      if( abs(particle.pdgId()) != 22 || particle.status() != 1 )
          continue;
       //
-      double dRtmp = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle->p4() );
+      double dRtmp = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle.p4() );
       if( dRtmp < dR ){
          dR = dRtmp;
-         closestPhoton = particle;
+         closestPhoton = &particle;
       }
    }
    // See if the closest photon (if it exists) is close enough.
@@ -632,15 +630,14 @@ int TreeWriter::matchToTruthAlternative(const pat::Photon &pho,
 
    int isMatched = UNMATCHED;
 
-   for(size_t i=0; i<genParticles->size();i++){
-      const reco::Candidate *particle = &(*genParticles)[i];
-      int pid = particle->pdgId();
+   for( auto const& particle: *genParticles ){
+      int pid = particle.pdgId();
       int ancestorPID = -999;
       int ancestorStatus = -999;
-      findFirstNonPhotonMother(particle, ancestorPID, ancestorStatus);
+      findFirstNonPhotonMother(&particle, ancestorPID, ancestorStatus);
       if( pid ==22 && TMath::Abs( ancestorPID ) <= 22 ){
-         double dr = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle->p4() );
-         float dpt = fabs( (pho.pt() - particle->pt() )/particle->pt());
+         double dr = ROOT::Math::VectorUtil::DeltaR( pho.p4(), particle.p4() );
+         float dpt = fabs( (pho.pt() - particle.pt() )/particle.pt());
          if (dr < 0.2 && dpt < 0.2){
             isMatched = MATCHED_FROM_GUDSCB;
             if( ancestorPID == 22 ){
