@@ -198,9 +198,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      triggerDecision_[it.first] = triggerBits->accept( it.second );
    }
 
+
    // MET Filters
    edm::Handle<edm::TriggerResults> metFilterBits;
-   edm::InputTag metFilterTag("TriggerResults","","PAT");
+   edm::InputTag metFilterTag("TriggerResults","");
    iEvent.getByLabel(metFilterTag, metFilterBits);
    // go through the filters and check if they were passed
    const edm::TriggerNames &allFilterNames = iEvent.triggerNames(*metFilterBits);
@@ -210,28 +211,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
    hCutFlow_->Fill("METfilters",1);
 
-   // Get photon collection
-   edm::Handle<edm::View<pat::Photon> > photonColl;
-   iEvent.getByToken(photonCollectionToken_, photonColl);
-
-   // Get jet collection
-   edm::Handle<pat::JetCollection> jetColl;
-   iEvent.getByToken(jetCollectionToken_, jetColl);
-   edm::Handle<reco::GenJetCollection> genJetColl;
-   iEvent.getByToken(genJetCollectionToken_, genJetColl);
-   edm::Handle<pat::MuonCollection> muonColl;
-   iEvent.getByToken(muonCollectionToken_, muonColl);
-   edm::Handle<edm::View<pat::Electron> > electronColl;
-   iEvent.getByToken(electronCollectionToken_, electronColl);
-   edm::Handle<pat::METCollection> metColl;
-   iEvent.getByToken(metCollectionToken_, metColl);
 
    // Get PV
    edm::Handle<reco::VertexCollection> vertices;
    iEvent.getByToken(vtxToken_, vertices);
    if (vertices->empty()) return; // skip the event if no PV found
    //const reco::Vertex &pv = vertices->front();
-   nPV_    = vertices->size();
+   nPV_ = vertices->size();
 
    reco::VertexCollection::const_iterator firstGoodVertex = vertices->end();
    nGoodVertices_=0;
@@ -258,14 +244,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken(rhoToken_,rhoH);
    rho_ = *rhoH;
 
-   // Get generator level info
-   // Pruned particles are the one containing "important" stuff
-   edm::Handle<edm::View<reco::GenParticle> > prunedGenParticles;
-   if (!isRealData_){
-      iEvent.getByToken(prunedGenToken_,prunedGenParticles);
-   }
-
    // Jets
+   edm::Handle<pat::JetCollection> jetColl;
+   iEvent.getByToken(jetCollectionToken_, jetColl);
+
    vJets_.clear();
    tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
@@ -276,11 +258,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       vJets_.push_back(trJet);
    } // jet loop
 
-   vGenJets_.clear();
-   tree::Particle trGJet;
-   for (const reco::GenJet& jet: *genJetColl){
-      trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
-      vGenJets_.push_back(trGJet);
+
+   if (!isRealData_){
+     edm::Handle<reco::GenJetCollection> genJetColl;
+     iEvent.getByToken(genJetCollectionToken_, genJetColl);
+     vGenJets_.clear();
+     tree::Particle trGJet;
+     for (const reco::GenJet& jet: *genJetColl){
+        trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+        vGenJets_.push_back(trGJet);
+     }
    }
 
    if (vJets_.empty()) return;
@@ -289,6 +276,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    double const HT=computeHT(vJets_);
    if (HT<dHT_cut_) return;
    hCutFlow_->Fill("HT",1);
+
+   // get gen particles before photons for the truth match
+   edm::Handle<edm::View<reco::GenParticle> > prunedGenParticles;
+   if (!isRealData_){
+      iEvent.getByToken(prunedGenToken_,prunedGenParticles);
+   }
 
    edm::Handle<edm::ValueMap<float> > phoWorstChargedIsolationMap;
    iEvent.getByToken(phoWorstChargedIsolationToken_, phoWorstChargedIsolationMap);
@@ -301,7 +294,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken(photonMediumIdMapToken_ ,medium_id_dec);
    iEvent.getByToken(photonTightIdMapToken_  ,tight_id_dec);
    iEvent.getByToken(photonMvaValuesMapToken_,mva_value);
-   // photon loop
+
+   // photon collection
+   edm::Handle<edm::View<pat::Photon> > photonColl;
+   iEvent.getByToken(photonCollectionToken_, photonColl);
+
    vPhotons_.clear();
    tree::Photon trPho;
    for(edm::View<pat::Photon>::const_iterator pho = photonColl->begin(); pho != photonColl->end(); pho++){
@@ -340,6 +337,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
+
       // MC match
       if (!isRealData_){
          trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
@@ -362,6 +360,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    hCutFlow_->Fill("photons",1);
 
    // Muons
+   edm::Handle<pat::MuonCollection> muonColl;
+   iEvent.getByToken(muonCollectionToken_, muonColl);
+
    vMuons_.clear();
    tree::Muon trMuon;
    for (const pat::Muon &mu : *muonColl) {
@@ -383,6 +384,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken(electronMediumIdMapToken_,medium_id_decisions);
    iEvent.getByToken(electronTightIdMapToken_ ,tight_id_decisions);
 
+   edm::Handle<edm::View<pat::Electron> > electronColl;
+   iEvent.getByToken(electronCollectionToken_, electronColl);
+
    vElectrons_.clear();
    tree::Electron trEl;
    for(edm::View<pat::Electron>::const_iterator el = electronColl->begin();el != electronColl->end(); el++){
@@ -396,6 +400,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // MET
+   edm::Handle<pat::METCollection> metColl;
+   iEvent.getByToken(metCollectionToken_, metColl);
+
    const pat::MET &met = metColl->front();
    pat::MET::LorentzVector metRaw=met.shiftedP4(pat::MET::NoShift, pat::MET::Raw);
    double metPt=met.pt();
@@ -415,10 +422,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       met_.uncertainty+=a*a;
    }
    met_.uncertainty=TMath::Sqrt(met_.uncertainty);
+
+
    // Generated Particles
    vGenParticles_.clear();
    tree::GenParticle trP;
    if (!isRealData_){
+      // Get generator level info
+      // Pruned particles are the one containing "important" stuff
+
       for (const reco::GenParticle &genP: *prunedGenParticles){
          if (abs(genP.pdgId())==24){ // W+-
 
