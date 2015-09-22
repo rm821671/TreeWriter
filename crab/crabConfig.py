@@ -1,12 +1,13 @@
 from WMCore.Configuration import Configuration
 import os
 
-cmssw_src=os.environ['CMSSW_BASE']+'/src/'
+#cmssw_src=os.environ['CMSSW_BASE']+'/src/'
+cmssw_src='/home/home4/institut_1b/kiesel/CMSSW/treewriter/CMSSW_7_4_5/src/'
 
 config = Configuration()
 
 config.section_("General")
-config.General.requestName   = 'TTJets'
+config.General.requestName   = 'requestName'
 config.General.transferOutputs = True
 config.General.transferLogs = True
 
@@ -16,20 +17,59 @@ config.JobType.pluginName  = 'Analysis'
 config.JobType.psetName    = cmssw_src+'TreeWriter/TreeWriter/python/runTreeWriter.py'
 
 config.section_("Data")
-config.Data.inputDataset = '/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM'
+config.Data.inputDataset = '/SinglePhoton/Run2015C-PromptReco-v1/MINIAOD'
 config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob = 200
+config.Data.unitsPerJob = 500
 config.Data.publication = False
 # This string is used to construct the output dataset name
-config.Data.publishDataName = 'knut'
-config.Data.outLFNDirBase = "/store/user/jolange/data/knut/"
+config.Data.publishDataName = 'V01'
+config.Data.outLFNDirBase = "/store/user/kiesel/13TeV/nTuples/"
 
 # These values only make sense for processing data
-#    Select input data based on a lumi mask
-# config.Data.lumiMask = 'Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt'
-#    Select input data based on run-ranges
-# config.Data.runRange = '190456-194076'
+#config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON.txt'
 
 config.section_("Site")
 # Where the output files will be transmitted to
 config.Site.storageSite = 'T2_DE_RWTH'
+
+datasets = []
+datasets.append('/SinglePhoton/Run2015C-PromptReco-v1/MINIAOD')
+datasets.append('/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
+datasets.append('/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
+datasets.append('/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM')
+datasets.append('/WJetsToLNu_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM')
+
+
+
+# call with 'python crabConfig.py'
+if __name__ == '__main__':
+    from CRABAPI.RawCommand import crabCommand
+    for dataset in datasets:
+        isSim = 'SIM' in dataset
+
+        if not isSim:
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON.txt'
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
+        else:
+            try: del config.Data.lumiMask
+            except: pass
+
+        if isSim:
+            config.General.requestName = dataset.split('/')[1]
+        else:
+            config.General.requestName = '_'.join(dataset.split('/')[1:3])
+
+        config.Data.inputDataset = dataset
+        print config
+        crabCommand('submit', config = config)
