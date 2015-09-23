@@ -4,16 +4,17 @@
 Get CMSSW environment 74X
 
 ```
-cmsrel CMSSW_7_4_7_patch2
-cd CMSSW_7_4_7_patch2/src/
+cmsrel CMSSW_7_4_12
+cd CMSSW_7_4_12/src/
 cmsenv
+git cms-merge-topic ikrav:egm_id_7.4.12_v1
 ```
 Get and build the TreeWriter
 
 ```
 git clone https://github.com/cms-susy-photon-rwth-1b/TreeWriter.git
-cd TreeWriter
 scram b
+cd TreeWriter
 ```
 Create Pilup Histograms
 
@@ -30,7 +31,14 @@ cmsRun TreeWriter/python/runTreeWriter.py
 ```
 . /cvmfs/cms.cern.ch/crab3/crab.sh
 cd crab
+```
+for a single dataset
+```
 crab submit -c crabConfig.py
+```
+for all datasets
+```
+python2 crabConfig.py
 ```
 
 ## Configure ##
@@ -56,9 +64,7 @@ in the python config, set
 ### Electrons ###
 - fulfilling "veto" id
 - boolean flags for loose/medium/tight
-- recipes:
-  * CMSSW72X [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_min)
-  * CMSSW74X [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Recipe_for_regular_users_for_74X)
+- recipes on [TWiki](https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2)
 
 ### Generated Particles ###
 - genJets collection is stored (= full slimmedGenJets)
