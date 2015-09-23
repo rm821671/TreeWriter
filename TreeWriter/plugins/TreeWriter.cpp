@@ -47,22 +47,22 @@ static double computeHT(const std::vector<tree::Jet>& jets)
 // constants, enums and typedefs
 //
 
-// Effective areas for photons from Savvas's slides
-// for phys14 PU20bx25, described here:
-// https://indico.cern.ch/event/367861/contribution/3/material/slides/0.pdf
+// Effective areas for photons for spring15
+// https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#Selection_implementation_det_AN1?rev=15
+//
 namespace EffectiveAreas {
    const int nEtaBins = 7;
    const float etaBinLimits[nEtaBins+1] = {
       0.0, 1.0, 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
 
    const float areaPhotons[nEtaBins] = {
-      0.0894, 0.0750, 0.0423, 0.0561, 0.0882, 0.1144, 0.1684
+      0.0725, 0.0604, 0.0320, 0.0512, 0.0766, 0.0949, 0.1160
    };
    const float areaNeutralHadrons[nEtaBins] = {
-      0.049, 0.0108, 0.0019, 0.0037, 0.0062, 0.0130, 0.1699
+      0.0143, 0.0210, 0.0147, 0.0082, 0.0124, 0.0186, 0.0320
    };
    const float areaChargedHadrons[nEtaBins] = {
-      0.0089, 0.0062, 0.0086, 0.0041, 0.0113, 0.0085, 0.0039
+      0.0158, 0.0143, 0.0115, 0.0094, 0.0095, 0.0068, 0.0053
    };
 }
 //
@@ -152,7 +152,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","METfilters","nGoodVertices","jets","HT","photons","final"}};
+   std::vector<TString> vCutBinNames{{"initial","METfilters","HT","photons","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -236,9 +236,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
    }
 
-   if (nGoodVertices_==0) return; // skip event if there are no good PVs
-   hCutFlow_->Fill("nGoodVertices",1);
-
    // Get rho
    edm::Handle< double > rhoH;
    iEvent.getByToken(rhoToken_,rhoH);
@@ -269,9 +266,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         vGenJets_.push_back(trGJet);
      }
    }
-
-   if (vJets_.empty()) return;
-   hCutFlow_->Fill("jets",1);
 
    double const HT=computeHT(vJets_);
    if (HT<dHT_cut_) return;
