@@ -18,14 +18,11 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.load("Configuration.StandardSequences.Geometry_cff")
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-# NOTE: the pick the right global tag!
-#    for PHYS14 scenario PU4bx50 : global tag is ???
-#    for PHYS14 scenario PU20bx25: global tag is PHYS14_25_V1
-#  as a rule, find the global tag in the DAS under the Configs for given dataset
-# process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
-process.GlobalTag.globaltag = 'MCRUN2_74_V9::All'
 
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+# TODO: global tag for data: auto:run2_data
 
 
 #
@@ -40,27 +37,13 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
 ###############################
 # Define MET Filters to apply #
 ###############################
-applyMetFilters=cms.untracked.vstring()
-# 8 TeV filters: obviously not yet tuned for 13TeV (See HBHE comment). Use them later.
-if False:
-    applyMetFilters.extend([
-        "Flag_CSCTightHaloFilter",
-        "Flag_HBHENoiseFilter", # kills almost 50% of 13TeV Events atm
-        "Flag_hcalLaserEventFilter",
-        "Flag_EcalDeadCellTriggerPrimitiveFilter",
-        "Flag_trackingFailureFilter",
-        # "Flag_eeBadScFilter", # only for 2012
-        # "Flag_ecalLaserCorrFilter", # only for some rereco
-        "Flag_trkPOG_toomanystripclus53X"
-    ])
-# recommended (27-07-15)
-# process name (see analyzer code) is "PAT", but "RECO" for "Run2015B PromptReco Data"
-# (see https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015#ETmiss_filters)
-applyMetFilters.extend([
+# See https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2?rev=39
+applyMetFilters=cms.untracked.vstring(
+    "Flag_HBHENoiseFilter",
     "Flag_CSCTightHaloFilter",
-    # "Flag_HBHENoiseFilter", # apply manually, see below
     "Flag_goodVertices",
-])
+    "Flag_eeBadScFilter"
+)
 # HBHE has to be manually re-run for early data
 # for now, the events are removed before the actual TreeWriter is run, so they
 # don't contribute in the CutFlow histogram to the "MET Filter" bin, but are already
@@ -97,15 +80,15 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     beamSpot = cms.InputTag('offlineBeamSpot'),
                                     conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
                                     # electron IDs
-                                    electronVetoIdMap   = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
-                                    electronLooseIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
-                                    electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
-                                    electronTightIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
+                                    electronVetoIdMap   = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
+                                    electronLooseIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
+                                    electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
+                                    electronTightIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
                                     # photon IDs
-                                    photonLooseIdMap   = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-loose"),
-                                    photonMediumIdMap  = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-medium"),
-                                    photonTightIdMap   = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-PHYS14-PU20bx25-V2-standalone-tight"),
-                                    photonMvaValuesMap = cms.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrigValues"),
+                                    photonLooseIdMap   = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-Spring15-50ns-V1-standalone-loose"),
+                                    photonMediumIdMap  = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-Spring15-50ns-V1-standalone-medium"),
+                                    photonTightIdMap   = cms.InputTag("egmPhotonIDs:cutBasedPhotonID-Spring15-50ns-V1-standalone-tight"),
+                                    photonMvaValuesMap = cms.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrig25nsV2Values"),
                                     # met filters to apply
                                     metFilterNames=applyMetFilters,
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
@@ -132,9 +115,9 @@ switchOnVIDElectronIdProducer(process, dataFormat)
 switchOnVIDPhotonIdProducer  (process, dataFormat)
 
 # define which IDs we want to produce
-el_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
-ph_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff',
-                 'RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring15_50ns_nonTrig_V0_cff']
+el_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff']
+ph_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring15_50ns_V1_cff',
+                 'RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring15_25ns_nonTrig_V2_cff']
 
 #add them to the VID producer
 for idmod in el_id_modules:
