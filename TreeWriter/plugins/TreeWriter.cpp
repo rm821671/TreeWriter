@@ -219,16 +219,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //const reco::Vertex &pv = vertices->front();
    nPV_ = vertices->size();
 
-   reco::VertexCollection::const_iterator firstGoodVertex = vertices->end();
+   reco::Vertex firstGoodVertex;
    nGoodVertices_=0;
-   for (reco::VertexCollection::const_iterator vtx = vertices->begin();
-        vtx != vertices->end(); ++vtx) {
+   for ( const auto& vtx : *vertices ) {
       // Replace isFake() for miniAOD because it requires tracks and miniAOD vertices don't have tracks:
       // Vertex.h: bool isFake() const {return (chi2_==0 && ndof_==0 && tracks_.empty());}
       if (  /*!vtx->isFake() &&*/
-         !(vtx->chi2()==0 && vtx->ndof()==0)
-         &&  vtx->ndof()>=4. && vtx->position().Rho()<=2.0
-         && fabs(vtx->position().Z())<=24.0)
+         !(vtx.chi2()==0 && vtx.ndof()==0)
+         &&  vtx.ndof()>=4. && vtx.position().Rho()<=2.0
+         && fabs(vtx.position().Z())<=24.0)
       {
          nGoodVertices_++;
          // first one?
@@ -362,7 +361,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    for (const pat::Muon &mu : *muonColl) {
       if (!mu.isLooseMuon()) continue;
       trMuon.p.SetPtEtaPhi(mu.pt(),mu.eta(),mu.phi());
-      trMuon.isTight=mu.isTightMuon(*firstGoodVertex);
+      trMuon.isTight=mu.isTightMuon(firstGoodVertex);
       // trMuon.someTestFloat=mu.isLooseMuon();
       vMuons_.push_back(trMuon);
    } // muon loop
