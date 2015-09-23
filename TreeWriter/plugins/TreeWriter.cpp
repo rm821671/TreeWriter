@@ -125,6 +125,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/F");
 
    eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
+   eventTree_->Branch("genLeptonsFromW" , &genLeptonsFromW_ , "genLeptonsFromW/I");
 
    eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
@@ -418,6 +419,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
    // Generated Particles
+   genLeptonsFromW_ = 0;
    vGenParticles_.clear();
    tree::GenParticle trP;
    if (!isRealData_){
@@ -425,27 +427,22 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // Pruned particles are the one containing "important" stuff
 
       for (const reco::GenParticle &genP: *prunedGenParticles){
-         if (abs(genP.pdgId())==24){ // W+-
 
-           // Find out if this is an intermediate W (has a W as daughter)
-            bool intermediateW = false;
-            for( unsigned i=0; i<genP.numberOfDaughters(); i++ ) {
-               // change the bool to true if W as daughter
-               intermediateW |= abs(genP.daughter(i)->pdgId()) == 24;
-            }
-            if( intermediateW ) continue; // not interested in intermediated W
-
-            // Save both daughters of the W
-            for( unsigned i=0; i<genP.numberOfDaughters(); i++ ) {
-               trP.p.SetPtEtaPhi(genP.daughter(i)->pt(),genP.daughter(i)->eta(),genP.daughter(i)->phi());
-               trP.pdgId = genP.daughter(i)->pdgId();
-               vGenParticles_.push_back(trP);
-            }
+         // count generetad leptons from W bosons
+         auto id = abs(genP.pdgId());
+         if( id == 11 || id == 13 || id == 15 ) { // charged leptons
+           bool WAsMother = false;
+           for( unsigned i=0;i<genP.numberOfMothers(); i++ ) {
+             if( abs(genP.mother(i)->pdgId() ) == 24 ) { WAsMother = true; }
+           }
+           if( WAsMother ) { genLeptonsFromW_++; }
          }
+
+         // save particles
          if (genP.status() != 1) continue; // only final state particles
          if (genP.pt() < 30)     continue;
-         trP.pdgId = genP.pdgId();
-         if (abs(trP.pdgId) == 11 || trP.pdgId == 22){ // e+-, photon
+         if (id == 11 || id == 22) { // e+-, photon
+            trP.pdgId = genP.pdgId();
             trP.p.SetPtEtaPhi(genP.pt(),genP.eta(),genP.phi());
             vGenParticles_.push_back(trP);
          }

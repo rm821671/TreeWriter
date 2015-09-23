@@ -132,6 +132,8 @@ private:
 
    Float_t dummyFloat_=0.;
 
+   Int_t genLeptonsFromW_=0.; // used e.g. to categrize ttbar decays
+
    ULong64_t evtNo_;
    UInt_t    runNo_;
    UInt_t    lumNo_;
