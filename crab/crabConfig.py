@@ -1,8 +1,9 @@
+#!/usr/bin/env python2
 from WMCore.Configuration import Configuration
 import os
 
 #cmssw_src=os.environ['CMSSW_BASE']+'/src/'
-cmssw_src='/home/home4/institut_1b/kiesel/CMSSW/treewriter/CMSSW_7_4_5/src/'
+cmssw_src='/home/home4/institut_1b/kiesel/CMSSW/treewriter/CMSSW_7_4_12/src/'
 
 config = Configuration()
 
@@ -22,7 +23,7 @@ config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 500
 config.Data.publication = False
 # This string is used to construct the output dataset name
-config.Data.publishDataName = 'V01'
+config.Data.publishDataName = 'V02'
 config.Data.outLFNDirBase = "/store/user/kiesel/13TeV/nTuples/"
 
 # These values only make sense for processing data
@@ -34,6 +35,7 @@ config.Site.storageSite = 'T2_DE_RWTH'
 
 datasets = []
 datasets.append('/SinglePhoton/Run2015C-PromptReco-v1/MINIAOD')
+datasets.append('/JetHT/Run2015C-PromptReco-v1/MINIAOD')
 datasets.append('/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
 datasets.append('/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
 datasets.append('/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
