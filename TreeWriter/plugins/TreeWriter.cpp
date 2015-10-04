@@ -87,6 +87,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , metCollectionToken_     (consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
    , rhoToken_               (consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
    , prunedGenToken_         (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
+   , pileUpSummaryToken_     (consumes<PileupSummaryInfoCollection>(iConfig.getParameter<edm::InputTag>("pileUpSummary")))
    // electron id
    , electronVetoIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronVetoIdMap"   )))
    , electronLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap"  )))
@@ -451,8 +452,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // PileUp weights
    if (!isRealData_){
-      edm::Handle<std::vector< PileupSummaryInfo > >  PupInfo;
-      iEvent.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
+      edm::Handle<PileupSummaryInfoCollection>  PupInfo;
+      iEvent.getByToken(pileUpSummaryToken_, PupInfo);
       float Tnpv = -1;
       for( auto const& PVI: *PupInfo ) {
          int BX = PVI.getBunchCrossing();

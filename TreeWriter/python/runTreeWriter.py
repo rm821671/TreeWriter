@@ -81,6 +81,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
                                     beamSpot = cms.InputTag('offlineBeamSpot'),
                                     conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
+                                    pileUpSummary = cms.InputTag('slimmedAddPileupInfo'),
                                     # electron IDs
                                     electronVetoIdMap   = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
                                     electronLooseIdMap  = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
@@ -136,7 +137,7 @@ process.p = cms.Path(
     process.photonIDValueMapProducer
     *process.egmGsfElectronIDSequence
     *process.egmPhotonIDSequence
-    *process.HBHENoiseFilterResultProducer #produces HBHE bools
-    *process.ApplyBaselineHBHENoiseFilter  #reject events based
+#    *process.HBHENoiseFilterResultProducer #produces HBHE bools
+#    *process.ApplyBaselineHBHENoiseFilter  #reject events based
     *process.TreeWriter
 )

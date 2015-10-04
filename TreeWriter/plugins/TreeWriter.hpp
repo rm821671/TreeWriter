@@ -49,6 +49,7 @@
 
 #include "TreeParticles.hpp"
 
+typedef std::vector<PileupSummaryInfo> PileupSummaryInfoCollection;
 
 
 //
@@ -98,6 +99,7 @@ private:
    edm::EDGetTokenT<pat::METCollection>        metCollectionToken_;
    edm::EDGetTokenT<double>                    rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
+   edm::EDGetTokenT<PileupSummaryInfoCollection>  pileUpSummaryToken_;
 
    // electron id
    edm::EDGetTokenT<edm::ValueMap<bool> > electronVetoIdMapToken_;
