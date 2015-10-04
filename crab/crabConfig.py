@@ -26,14 +26,13 @@ config.Data.publication = False
 config.Data.publishDataName = 'V02'
 config.Data.outLFNDirBase = "/store/user/kiesel/13TeV/nTuples/"
 
-# These values only make sense for processing data
-#config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON.txt'
-
 config.section_("Site")
 # Where the output files will be transmitted to
 config.Site.storageSite = 'T2_DE_RWTH'
 
 datasets = []
+datasets.append('/SinglePhoton/Run2015D-PromptReco-v3/MINIAOD')
+datasets.append('/JetHT/Run2015D-PromptReco-v3/MINIAOD')
 datasets.append('/SinglePhoton/Run2015C-PromptReco-v1/MINIAOD')
 datasets.append('/JetHT/Run2015C-PromptReco-v1/MINIAOD')
 datasets.append('/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
@@ -51,6 +50,9 @@ datasets.append('/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIIS
 datasets.append('/WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
 datasets.append('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM')
 
+# temporary fix found here https://hypernews.cern.ch/HyperNews/CMS/get/crabFeedback/8195/1.html
+config.Data.ignoreLocality = True
+config.Site.whitelist = ["T2_CH_CERN"]
 
 
 # call with 'python crabConfig.py'
@@ -60,9 +62,7 @@ if __name__ == '__main__':
         isSim = 'SIM' in dataset
 
         if not isSim:
-            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON.txt'
-            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
-            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
         else:
             try: del config.Data.lumiMask
             except: pass
