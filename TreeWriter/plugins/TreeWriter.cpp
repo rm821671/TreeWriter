@@ -88,6 +88,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , rhoToken_               (consumes<double> (iConfig.getParameter<edm::InputTag>("rho")))
    , prunedGenToken_         (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedGenParticles")))
    , pileUpSummaryToken_     (consumes<PileupSummaryInfoCollection>(iConfig.getParameter<edm::InputTag>("pileUpSummary")))
+   , LHEEventToken_          (consumes<LHEEventProduct>(iConfig.getParameter<edm::InputTag>("lheEventProduct")))
    // electron id
    , electronVetoIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronVetoIdMap"   )))
    , electronLooseIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdMap"  )))
@@ -127,6 +128,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
    eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
    eventTree_->Branch("genLeptonsFromW" , &genLeptonsFromW_ , "genLeptonsFromW/I");
+   eventTree_->Branch("genHt" , &genHt_ , "genHt/F");
 
    eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
@@ -417,6 +419,31 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       met_.uncertainty+=a*a;
    }
    met_.uncertainty=TMath::Sqrt(met_.uncertainty);
+
+   // generated HT
+   // stolen from https://github.com/Aachen-3A/PxlSkimmer/blob/master/Skimming/src/PxlSkimmer_miniAOD.cc#L590
+   genHt_ = -1;
+   if( !isRealData_ ) {
+
+      edm::Handle<LHEEventProduct> lheInfoHandle;
+      iEvent.getByToken(LHEEventToken_, lheInfoHandle);
+
+      if (lheInfoHandle.isValid()) {
+         lhef::HEPEUP lheParticleInfo = lheInfoHandle->hepeup();
+         // get the five vector
+         // (Px, Py, Pz, E and M in GeV)
+         std::vector<lhef::HEPEUP::FiveVector> allParticles = lheParticleInfo.PUP;
+         std::vector<int> statusCodes = lheParticleInfo.ISTUP;
+
+         genHt_ = 0;
+         for (unsigned int i = 0; i < statusCodes.size(); i++) {
+            auto absId = abs(lheParticleInfo.IDUP[i]);
+            if (statusCodes[i] == 1 && ( absId < 11 || absId > 16 ) && absId != 22  ) {
+               genHt_ += sqrt(pow(allParticles[i][0], 2) + pow(allParticles[i][1], 2));
+            }
+         } // end paricle loop
+      } // valid lhe
+   }
 
 
    // Generated Particles

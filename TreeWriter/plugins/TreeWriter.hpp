@@ -38,6 +38,7 @@
 
 #include <SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h>
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
@@ -100,6 +101,7 @@ private:
    edm::EDGetTokenT<double>                    rhoToken_;
    edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
    edm::EDGetTokenT<PileupSummaryInfoCollection>  pileUpSummaryToken_;
+   edm::EDGetTokenT<LHEEventProduct>           LHEEventToken_;
 
    // electron id
    edm::EDGetTokenT<edm::ValueMap<bool> > electronVetoIdMapToken_;
@@ -135,6 +137,7 @@ private:
    Float_t dummyFloat_=0.;
 
    Int_t genLeptonsFromW_=0.; // used e.g. to categrize ttbar decays
+   Float_t genHt_;
 
    ULong64_t evtNo_;
    UInt_t    runNo_;
