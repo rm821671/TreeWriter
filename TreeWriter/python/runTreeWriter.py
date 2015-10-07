@@ -5,7 +5,7 @@ options = VarParsing ('analysis')
 options.register ('dataset',
                   '',
                   VarParsing.multiplicity.singleton,
-                  VarParsing.varType.int,
+                  VarParsing.varType.string,
                   "Name of the dataset, used to do further settings")
 
 # setup any defaults you want
