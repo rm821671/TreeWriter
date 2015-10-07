@@ -121,6 +121,7 @@ private:
    edm::EDGetTokenT<edm::ValueMap<float> > phoWorstChargedIsolationToken_;
 
    const std::string pileupHistogramName_;
+   edm::EDGetTokenT<bool> HBHENoiseFilterResult_;
 
    // === TREE DATA ===
    TTree *eventTree_;

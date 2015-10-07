@@ -103,6 +103,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
+   , HBHENoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHENoiseFilterResult")))
    , triggerNames_(iConfig.getParameter<std::vector<std::string>>("triggerNames"))
 {
 
@@ -156,7 +157,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","METfilters","HT","photons","final"}};
+   std::vector<TString> vCutBinNames{{"initial","METfilters","HBHENoiseFilter","HT","photons","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -174,7 +175,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    hCutFlow_->Fill("initial",1);
    isRealData_=iEvent.isRealData();
-
 
    edm::Handle<edm::TriggerResults> triggerBits;
    edm::InputTag triggerTag("TriggerResults","","HLT");
@@ -214,6 +214,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if (!metFilterBits->accept(index)) return; // not passed
    }
    hCutFlow_->Fill("METfilters",1);
+   // this is manually re-run atm:
+   edm::Handle<bool> HBHENoiseFilterResult;
+   iEvent.getByToken(HBHENoiseFilterResult_, HBHENoiseFilterResult);
+   if (!*HBHENoiseFilterResult) return;
+   hCutFlow_->Fill("HBHENoiseFilter",1);
 
 
    // Get PV

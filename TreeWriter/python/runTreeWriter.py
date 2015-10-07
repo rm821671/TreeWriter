@@ -46,21 +46,13 @@ applyMetFilters=cms.untracked.vstring(
     "Flag_goodVertices",
     "Flag_eeBadScFilter"
 )
-# HBHE has to be manually re-run for early data
-# for now, the events are removed before the actual TreeWriter is run, so they
-# don't contribute in the CutFlow histogram to the "MET Filter" bin, but are already
-# missing in "initial"
+# HBHE has to be manually re-run for early data.
+# This is not applied as EDFilter, as suggested, but manually
+# checked in TreeWriter (otherwise the "initial" event count
+# is wrong)
+# TODO: remove, when fixed upstream
 process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-
-process.ApplyBaselineHBHENoiseFilter = cms.EDFilter(
-    'BooleanFlagFilter',
-    # "Run2Tight" for 25ns. Normally this should be set automatically by eras module, but it
-    # does not work somehow. (Setting Run2Loose here yields the same results, so the the
-    # automatic setting seems to use a run1 configuration.)
-    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
-    reverseDecision = cms.bool(False)
-)
 
 ################################
 # The actual TreeWriter module #
@@ -98,6 +90,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     metFilterNames=applyMetFilters,
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
+                                    HBHENoiseFilterResult = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
                                     # triggers to be saved
                                     # Warning: To be independent of the version number, the trigger result is saved if the trigger name begins
                                     # with the strings given here. E.g. "HLT" would always be true if any of the triggers fired.
@@ -138,7 +131,6 @@ process.p = cms.Path(
     process.photonIDValueMapProducer
     *process.egmGsfElectronIDSequence
     *process.egmPhotonIDSequence
-    *process.HBHENoiseFilterResultProducer #produces HBHE bools
-    *process.ApplyBaselineHBHENoiseFilter  #reject events based
+    *process.HBHENoiseFilterResultProducer #produces HBHE bools (applied in TreeWriter manually)
     *process.TreeWriter
 )
