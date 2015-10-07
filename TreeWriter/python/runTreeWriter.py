@@ -2,6 +2,11 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 options = VarParsing.VarParsing ('analysis')
+options.register ('dataset',
+                  '',
+                  VarParsing.multiplicity.singleton,
+                  VarParsing.varType.int,
+                  "Name of the dataset, used to do further settings")
 
 # setup any defaults you want
 options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root'
@@ -23,8 +28,8 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
-# TODO: global tag for data: auto:run2_data
+gtName = "auto:run2_mc" if dataset.endswith("SIM") else "auto:run2_data"
+process.GlobalTag = GlobalTag(process.GlobalTag, gtName, '')
 
 
 #

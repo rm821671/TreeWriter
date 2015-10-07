@@ -2,8 +2,7 @@
 from WMCore.Configuration import Configuration
 import os
 
-#cmssw_src=os.environ['CMSSW_BASE']+'/src/'
-cmssw_src='/home/home4/institut_1b/kiesel/CMSSW/treewriter/CMSSW_7_4_12/src/'
+cmssw_src=os.environ['CMSSW_BASE']+'/src/'
 
 config = Configuration()
 
@@ -39,6 +38,8 @@ datasets.append('/GJets_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunII
 datasets.append('/GJets_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
 datasets.append('/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
 datasets.append('/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
+datasets.append('/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
+datasets.append('/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
 datasets.append('/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
 datasets.append('/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
 datasets.append('/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
@@ -60,7 +61,9 @@ config.Site.whitelist = ["T2_CH_CERN"]
 # call with 'python crabConfig.py'
 if __name__ == '__main__':
     from CRABAPI.RawCommand import crabCommand
+
     for dataset in datasets:
+
         isSim = 'SIM' in dataset
 
         if not isSim:
@@ -74,6 +77,8 @@ if __name__ == '__main__':
         else:
             config.General.requestName = '_'.join(dataset.split('/')[1:3])
 
+        config.JobType.pyCfgParams = [ "dataset="+dataset ]
+
         config.Data.inputDataset = dataset
         print config
-        crabCommand('submit', config = config)
+        #crabCommand('submit', config = config)
