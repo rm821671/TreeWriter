@@ -80,5 +80,4 @@ if __name__ == '__main__':
         config.JobType.pyCfgParams = [ "dataset="+dataset ]
 
         config.Data.inputDataset = dataset
-        print config
-        #crabCommand('submit', config = config)
+        crabCommand('submit', config = config)
