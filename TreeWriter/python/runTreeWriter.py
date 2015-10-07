@@ -18,6 +18,10 @@ options.maxEvents = -1
 # get and parse the command line arguments
 options.parseArguments()
 
+# determine if Data or Simulation
+isRealData=(not options.dataset.endswith("SIM"))
+
+# the actual TreeWriter module
 process = cms.Process("TreeWriter")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -25,10 +29,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.load("Configuration.StandardSequences.Geometry_cff")
 
-
+# determine global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-gtName = "auto:run2_mc" if options.dataset.endswith("SIM") else "auto:run2_data"
+gtName = "auto:run2_data" if isRealData else "auto:run2_mc"
 process.GlobalTag = GlobalTag(process.GlobalTag, gtName, '')
 
 
