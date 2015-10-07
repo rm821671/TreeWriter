@@ -325,6 +325,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isTight = (*tight_id_dec) [phoPtr];
 
       // write the photon to collection
+      if (!trPho.isLoose) continue;
       vPhotons_.push_back(trPho);
    } // photon loop
 
