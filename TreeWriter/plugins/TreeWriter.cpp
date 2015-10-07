@@ -502,7 +502,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // generator weights
-   mc_weight_=0.;
+   mc_weight_=1.; // 1 for data
    if (!isRealData_){
       edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
       iEvent.getByLabel("generator", GenEventInfoHandle);
