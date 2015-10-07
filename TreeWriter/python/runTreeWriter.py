@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
-import FWCore.ParameterSet.VarParsing as VarParsing
+from FWCore.ParameterSet.VarParsing import VarParsing
 
-options = VarParsing.VarParsing ('analysis')
+options = VarParsing ('analysis')
 options.register ('dataset',
                   '',
                   VarParsing.multiplicity.singleton,
@@ -28,7 +28,7 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
-gtName = "auto:run2_mc" if dataset.endswith("SIM") else "auto:run2_data"
+gtName = "auto:run2_mc" if options.dataset.endswith("SIM") else "auto:run2_data"
 process.GlobalTag = GlobalTag(process.GlobalTag, gtName, '')
 
 
