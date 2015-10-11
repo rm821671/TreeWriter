@@ -67,7 +67,7 @@ if __name__ == '__main__':
         isSim = 'SIM' in dataset
 
         if not isSim:
-            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt'
 
         else:
             try: del config.Data.lumiMask

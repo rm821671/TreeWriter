@@ -1,5 +1,5 @@
 #doku in https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData
-ANA_JSON=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+ANA_JSON=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt
 PU_JSON=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_JSON_1.2_PRE_10-09-2015.txt
 
 PU_CALC=pileupCalc.py --calcMode true --maxPileupBin 60 --numPileupBins 60 -i $(ANA_JSON) --inputLumiJSON $(PU_JSON)
