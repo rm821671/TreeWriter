@@ -378,6 +378,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    vJets_.clear();
    tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
+      if (!isLooseJet(jet)) continue;
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
       trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
       trJet.someTestFloat=jet.chargedEmEnergyFraction();
