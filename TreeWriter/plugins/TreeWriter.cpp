@@ -156,7 +156,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","METfilters","HBHENoiseFilter","HT","photons","final"}};
+   std::vector<TString> vCutBinNames{{"initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -248,36 +248,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle< double > rhoH;
    iEvent.getByToken(rhoToken_,rhoH);
    rho_ = *rhoH;
-
-   // Jets
-   edm::Handle<pat::JetCollection> jetColl;
-   iEvent.getByToken(jetCollectionToken_, jetColl);
-
-   vJets_.clear();
-   tree::Jet trJet;
-   for (const pat::Jet& jet : *jetColl){
-      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
-      trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
-      trJet.someTestFloat=jet.chargedEmEnergyFraction();
-      trJet.isLoose=isLooseJet(jet);
-      vJets_.push_back(trJet);
-   } // jet loop
-
-
-   if (!isRealData){
-     edm::Handle<reco::GenJetCollection> genJetColl;
-     iEvent.getByToken(genJetCollectionToken_, genJetColl);
-     vGenJets_.clear();
-     tree::Particle trGJet;
-     for (const reco::GenJet& jet: *genJetColl){
-        trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
-        vGenJets_.push_back(trGJet);
-     }
-   }
-
-   double const HT=computeHT(vJets_);
-   if (HT<dHT_cut_) return;
-   hCutFlow_->Fill("HT",1);
 
    // get gen particles before photons for the truth match
    edm::Handle<edm::View<reco::GenParticle> > prunedGenParticles;
@@ -400,6 +370,36 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trEl.p.SetPtEtaPhi(el->pt(),el->superCluster()->eta(),el->superCluster()->phi());
       vElectrons_.push_back(trEl);
    }
+
+   // Jets
+   edm::Handle<pat::JetCollection> jetColl;
+   iEvent.getByToken(jetCollectionToken_, jetColl);
+
+   vJets_.clear();
+   tree::Jet trJet;
+   for (const pat::Jet& jet : *jetColl){
+      trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+      trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+      trJet.someTestFloat=jet.chargedEmEnergyFraction();
+      trJet.isLoose=isLooseJet(jet);
+      vJets_.push_back(trJet);
+   } // jet loop
+
+
+   if (!isRealData){
+     edm::Handle<reco::GenJetCollection> genJetColl;
+     iEvent.getByToken(genJetCollectionToken_, genJetColl);
+     vGenJets_.clear();
+     tree::Particle trGJet;
+     for (const reco::GenJet& jet: *genJetColl){
+        trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
+        vGenJets_.push_back(trGJet);
+     }
+   }
+
+   double const HT=computeHT(vJets_);
+   if (HT<dHT_cut_) return;
+   hCutFlow_->Fill("HT",1);
 
    // MET
    edm::Handle<pat::METCollection> metColl;
