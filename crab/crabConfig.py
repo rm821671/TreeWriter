@@ -32,8 +32,6 @@ config.Site.storageSite = 'T2_DE_RWTH'
 datasets = []
 datasets.append('/SinglePhoton/Run2015D-PromptReco-v3/MINIAOD')
 datasets.append('/JetHT/Run2015D-PromptReco-v3/MINIAOD')
-datasets.append('/SinglePhoton/Run2015C-PromptReco-v1/MINIAOD')
-datasets.append('/JetHT/Run2015C-PromptReco-v1/MINIAOD')
 datasets.append('/GJets_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
 datasets.append('/GJets_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM')
 datasets.append('/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
