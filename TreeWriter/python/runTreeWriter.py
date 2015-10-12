@@ -68,8 +68,8 @@ process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 ################################
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
-                                    HT_cut=cms.untracked.double(200.),
-                                    photon_pT_cut=cms.untracked.double(90.),
+                                    HT_cut=cms.untracked.double(0.),
+                                    photon_pT_cut=cms.untracked.double(20.),
                                     # physics objects
                                     photons = cms.InputTag("slimmedPhotons"),
                                     jets = cms.InputTag("slimmedJets"),
@@ -103,7 +103,22 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # triggers to be saved
                                     # Warning: To be independent of the version number, the trigger result is saved if the trigger name begins
                                     # with the strings given here. E.g. "HLT" would always be true if any of the triggers fired.
-                                    triggerNames=cms.vstring( "HLT_Photon90_CaloIdL_PFHT500_v","HLT_Photon90_v", "HLT_PFHT600_v" ),
+                                    triggerNames=cms.vstring(
+                                        "HLT_Photon90_CaloIdL_PFHT500_v",
+                                        "HLT_Photon90_v",
+                                        "HLT_PFHT600_v",
+                                        "HLT_Photon36_R9Id90_HE10_Iso40_EBOnly_PFMET40_v",
+                                        "HLT_Photon36_R9Id90_HE10_Iso40_EBOnly_VBF_v",
+                                        "HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_PFMET40_v",
+                                        "HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_VBF_v",
+                                        "HLT_Photon22_v",
+                                        "HLT_Photon30_v",
+                                        "HLT_Photon36_v",
+                                        "HLT_Photon50_v",
+                                        "HLT_Photon165_R9Id90_HE10_IsoM_v",
+                                        "HLT_Photon36_R9Id90_HE10_IsoM_v",
+                                        "HLT_PFMET170_v"
+                                    )
 )
 
 process.TFileService = cms.Service("TFileService",fileName = cms.string(options.outputFile))
