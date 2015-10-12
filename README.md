@@ -13,7 +13,7 @@ Get and build the TreeWriter
 
 ```
 git clone https://github.com/cms-susy-photon-rwth-1b/TreeWriter.git
-scram b
+scram b -j5
 cd TreeWriter
 ```
 Create Pilup Histograms
