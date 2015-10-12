@@ -23,6 +23,8 @@ def writeObjectsToFile( list, filename ):
 
 
 if __name__ == "__main__":
+    # nicer to view this way (but errors are not used anyway):
+    ROOT.TH1.SetDefaultSumw2(True)
 
     import sys
     if len(sys.argv) < 2:
