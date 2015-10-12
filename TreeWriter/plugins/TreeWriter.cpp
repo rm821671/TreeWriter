@@ -382,6 +382,21 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
       trJet.someTestFloat=jet.chargedEmEnergyFraction();
       trJet.isLoose=isLooseJet(jet);
+      // object matching
+      trJet.hasPhotonMatch=false;
+      for (tree::Photon const &ph: vPhotons_){
+         if (ph.isLoose && trJet.p.DeltaR(ph.p) < 0.4){
+            trJet.hasPhotonMatch=true;
+            break;
+         }
+      }
+      trJet.hasElectronMatch=false;
+      for (tree::Electron const &el: vElectrons_){
+         if (el.isLoose && trJet.p.DeltaR(el.p) < 0.4){
+            trJet.hasElectronMatch=true;
+            break;
+         }
+      }
       vJets_.push_back(trJet);
    } // jet loop
 

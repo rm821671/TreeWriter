@@ -43,6 +43,8 @@ namespace tree
    struct Jet : public Particle
    {
       bool isLoose;
+      bool hasPhotonMatch;
+      bool hasElectronMatch;
       float bDiscriminator;
    };
 
