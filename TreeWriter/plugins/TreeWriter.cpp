@@ -118,7 +118,6 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("met"      , &met_);
    eventTree_->Branch("genParticles", &vGenParticles_);
 
-   eventTree_->Branch("isRealData"    , &isRealData_    , "isRealData/O");
    eventTree_->Branch("nPV"           , &nPV_           , "nPV/I");
    eventTree_->Branch("true_nPV"      , &true_nPV_      , "true_nPV/I");
    eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nGoodVertices/I");
@@ -174,7 +173,8 @@ void
 TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    hCutFlow_->Fill("initial",1);
-   isRealData_=iEvent.isRealData();
+   Bool_t  isRealData; // data or MC
+   isRealData=iEvent.isRealData();
 
    edm::Handle<edm::TriggerResults> triggerBits;
    edm::InputTag triggerTag("TriggerResults","","HLT");
@@ -264,7 +264,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } // jet loop
 
 
-   if (!isRealData_){
+   if (!isRealData){
      edm::Handle<reco::GenJetCollection> genJetColl;
      iEvent.getByToken(genJetCollectionToken_, genJetColl);
      vGenJets_.clear();
@@ -281,7 +281,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // get gen particles before photons for the truth match
    edm::Handle<edm::View<reco::GenParticle> > prunedGenParticles;
-   if (!isRealData_){
+   if (!isRealData){
       iEvent.getByToken(prunedGenToken_,prunedGenParticles);
    }
 
@@ -341,7 +341,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
       // MC match
-      if (!isRealData_){
+      if (!isRealData){
          trPho.isTrue=matchToTruth(*pho, prunedGenParticles);
          trPho.isTrueAlternative=matchToTruthAlternative(*pho, prunedGenParticles);
       }else{
@@ -428,7 +428,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // generated HT
    // stolen from https://github.com/Aachen-3A/PxlSkimmer/blob/master/Skimming/src/PxlSkimmer_miniAOD.cc#L590
    genHt_ = -1;
-   if( !isRealData_ ) {
+   if( !isRealData ) {
 
       edm::Handle<LHEEventProduct> lheInfoHandle;
       iEvent.getByToken(LHEEventToken_, lheInfoHandle);
@@ -455,7 +455,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    genLeptonsFromW_ = 0;
    vGenParticles_.clear();
    tree::GenParticle trP;
-   if (!isRealData_){
+   if (!isRealData){
       // Get generator level info
       // Pruned particles are the one containing "important" stuff
 
@@ -483,7 +483,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // PileUp weights
-   if (!isRealData_){
+   if (!isRealData){
       edm::Handle<PileupSummaryInfoCollection>  PupInfo;
       iEvent.getByToken(pileUpSummaryToken_, PupInfo);
       float Tnpv = -1;
@@ -503,7 +503,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // generator weights
    mc_weight_=1.; // 1 for data
-   if (!isRealData_){
+   if (!isRealData){
       edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
       iEvent.getByLabel("generator", GenEventInfoHandle);
       mc_weight_=GenEventInfoHandle->weight();
