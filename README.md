@@ -56,6 +56,7 @@ in the python config, set
 - ak4PFJetsCHS
 - all jets are used
 - boolean flag for: loose
+- boolean flags for whether a loose electron/photon is found within dR<0.4
 
 ### Muons ###
 - fulfilling loose id
