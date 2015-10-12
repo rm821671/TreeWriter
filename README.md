@@ -4,8 +4,8 @@
 Get CMSSW environment 74X
 
 ```
-cmsrel CMSSW_7_4_12
-cd CMSSW_7_4_12/src/
+cmsrel CMSSW_7_4_14
+cd CMSSW_7_4_14/src/
 cmsenv
 git cms-merge-topic ikrav:egm_id_7.4.12_v1
 ```
