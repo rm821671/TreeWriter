@@ -72,6 +72,13 @@ namespace EffectiveAreas {
 }
 //
 
+double dR_leadingJet_gen_reco( const reco::GenJetCollection& genJets, const pat::JetCollection& recoJets ) {
+    double dR = -1.;
+    if( genJets.size() && recoJets.size() ) {
+        dR = deltaR<reco::GenJet,pat::Jet>( genJets.at(0), recoJets.at(0) );
+    }
+    return dR;
+}
 
 //
 // static data member definitions
@@ -83,6 +90,7 @@ namespace EffectiveAreas {
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    : dHT_cut_(iConfig.getUntrackedParameter<double>("HT_cut"))
    , dPhoton_pT_cut_(iConfig.getUntrackedParameter<double>("photon_pT_cut"))
+   , dR_leadingJet_gen_reco_cut_(iConfig.getUntrackedParameter<double>("dR_leadingJet_gen_reco_cut"))
    , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
@@ -130,6 +138,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/B");
 
    eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
+   eventTree_->Branch("dR_recoGenJet" , &dR_recoGenJet_ , "dR_recoGenJet/F");
    eventTree_->Branch("genLeptonsFromW" , &genLeptonsFromW_ , "genLeptonsFromW/I");
    eventTree_->Branch("genHt" , &genHt_ , "genHt/F");
 
@@ -433,8 +442,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } // jet loop
 
 
+   edm::Handle<reco::GenJetCollection> genJetColl;
    if (!isRealData){
-     edm::Handle<reco::GenJetCollection> genJetColl;
      iEvent.getByToken(genJetCollectionToken_, genJetColl);
      vGenJets_.clear();
      tree::Particle trGJet;
@@ -528,6 +537,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          }
       }
    }
+
+   dR_recoGenJet_ = -1;
+   if(!isRealData && dR_leadingJet_gen_reco_cut_ > 0 ) {
+      dR_recoGenJet_ = dR_leadingJet_gen_reco( *genJetColl, *jetColl );
+   }
+
 
    hCutFlow_->Fill("final",mc_weight_*pu_weight_);
    // store event identity

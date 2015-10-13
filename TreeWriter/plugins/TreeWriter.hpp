@@ -25,6 +25,8 @@
 
 #include "DataFormats/Common/interface/ValueMap.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
+
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
@@ -90,6 +92,7 @@ private:
    // ----------member data ---------------------------
    double dHT_cut_;
    double dPhoton_pT_cut_;
+   double dR_leadingJet_gen_reco_cut_;
 
    edm::EDGetTokenT<reco::VertexCollection>    vtxToken_;
    edm::EDGetTokenT<edm::View<pat::Photon> >   photonCollectionToken_;
@@ -133,6 +136,7 @@ private:
    Char_t mc_weight_; // True for positive event weights
 
    Float_t dummyFloat_=0.;
+   Float_t dR_recoGenJet_=-1;
 
    Int_t genLeptonsFromW_=0.; // used e.g. to categrize ttbar decays
    Float_t genHt_;

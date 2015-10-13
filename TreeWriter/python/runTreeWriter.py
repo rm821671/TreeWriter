@@ -76,6 +76,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
                                     HT_cut=cms.untracked.double(0.),
                                     photon_pT_cut=cms.untracked.double(20.),
+                                    dR_leadingJet_gen_reco_cut=cms.untracked.double(0.5), # not used yet
                                     # physics objects
                                     photons = cms.InputTag("slimmedPhotons"),
                                     jets = cms.InputTag("slimmedJets"),
