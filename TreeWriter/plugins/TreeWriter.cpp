@@ -124,7 +124,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
    eventTree_->Branch("pu_weight"     , &pu_weight_     , "pu_weight/F");
-   eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/F");
+   eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/O");
 
    eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
    eventTree_->Branch("genLeptonsFromW" , &genLeptonsFromW_ , "genLeptonsFromW/I");
@@ -520,11 +520,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // generator weights
-   mc_weight_=1.; // 1 for data
+   mc_weight_=true; // 1 for data
    if (!isRealData){
       edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
       iEvent.getByLabel("generator", GenEventInfoHandle);
-      mc_weight_=GenEventInfoHandle->weight();
+      mc_weight_= GenEventInfoHandle->weight() >= 0;
    }
 
    hCutFlow_->Fill("final",1);
