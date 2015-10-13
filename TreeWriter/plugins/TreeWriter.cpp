@@ -159,7 +159,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial_unweighted", "initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
+   std::vector<TString> vCutBinNames{{"initial_unweighted","initial_mc_weighted","initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -204,6 +204,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       mc_weight_= sign(GenEventInfoHandle->weight());
    }
 
+   hCutFlow_->Fill("initial_mc_weighted",mc_weight_);
    hCutFlow_->Fill("initial",mc_weight_*pu_weight_);
 
    edm::Handle<edm::TriggerResults> triggerBits;
