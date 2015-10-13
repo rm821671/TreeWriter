@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
+import re
 
 options = VarParsing ('analysis')
 options.register ('dataset',
@@ -33,6 +34,11 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 gtName = "auto:run2_data" if isRealData else "auto:run2_mc"
+
+# for further global tags, see here:
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD
+if re.match( "/.*/Run2015.*05Oct2015.*/MINIAOD", options.dataset ): gtName = "74X_dataRun2_reMiniAOD_v0::All"
+if re.match( "/.*/.*RunIISpring15MiniAODv2.*/MINIAODSIM", options.dataset ): gtName = "74X_mcRun2_asymptotic_v2::All"
 process.GlobalTag = GlobalTag(process.GlobalTag, gtName, '')
 
 
