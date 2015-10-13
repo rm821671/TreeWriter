@@ -199,7 +199,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // set trigger decision
    for( auto& it : triggerIndex_ ) {
-     triggerDecision_[it.first] = triggerBits->accept( it.second );
+      if( it.second != -1 ) {
+         triggerDecision_[it.first] = triggerBits->accept( it.second );
+      }
    }
 
 
