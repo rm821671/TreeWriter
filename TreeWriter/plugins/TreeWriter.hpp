@@ -130,7 +130,7 @@ private:
    Float_t rho_;   // the rho variable
 
    Float_t pu_weight_; // pileup weight
-   Bool_t mc_weight_; // True for positive event weights
+   Char_t mc_weight_; // True for positive event weights
 
    Float_t dummyFloat_=0.;
 

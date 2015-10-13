@@ -43,6 +43,11 @@ static double computeHT(const std::vector<tree::Jet>& jets)
    return HT;
 }
 
+template <typename T> int sign(T val) {
+   return (T(0) < val) - (val < T(0));
+}
+
+
 //
 // constants, enums and typedefs
 //
@@ -122,7 +127,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
    eventTree_->Branch("pu_weight"     , &pu_weight_     , "pu_weight/F");
-   eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/O");
+   eventTree_->Branch("mc_weight"     , &mc_weight_     , "mc_weight/B");
 
    eventTree_->Branch("dummyFloat" , &dummyFloat_ , "dummyFloat/F");
    eventTree_->Branch("genLeptonsFromW" , &genLeptonsFromW_ , "genLeptonsFromW/I");
@@ -154,7 +159,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
+   std::vector<TString> vCutBinNames{{"initial_unweighted", "initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -170,9 +175,36 @@ TreeWriter::~TreeWriter(){}
 void
 TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   hCutFlow_->Fill("initial",1);
+   hCutFlow_->Fill("initial_unweighted",1);
    Bool_t  isRealData; // data or MC
    isRealData=iEvent.isRealData();
+
+   // PileUp weights
+   if (!isRealData){
+      edm::Handle<PileupSummaryInfoCollection>  PupInfo;
+      iEvent.getByToken(pileUpSummaryToken_, PupInfo);
+      float Tnpv = -1;
+      for( auto const& PVI: *PupInfo ) {
+         int BX = PVI.getBunchCrossing();
+         if(BX == 0) {
+            Tnpv = PVI.getTrueNumInteractions();
+            continue;
+         }
+      }
+      pu_weight_=hPU_.GetBinContent(hPU_.FindBin(Tnpv));
+   }else{ // real data
+      pu_weight_=1.;
+   }
+
+   // generator weights
+   mc_weight_=1; // 1 for data
+   if (!isRealData){
+      edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
+      iEvent.getByLabel("generator", GenEventInfoHandle);
+      mc_weight_= sign(GenEventInfoHandle->weight());
+   }
+
+   hCutFlow_->Fill("initial",mc_weight_*pu_weight_);
 
    edm::Handle<edm::TriggerResults> triggerBits;
    edm::InputTag triggerTag("TriggerResults","","HLT");
@@ -213,12 +245,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       const int index=allFilterNames.triggerIndex(name);
       if (!metFilterBits->accept(index)) return; // not passed
    }
-   hCutFlow_->Fill("METfilters",1);
+   hCutFlow_->Fill("METfilters",mc_weight_*pu_weight_);
    // this is manually re-run atm:
    edm::Handle<bool> HBHENoiseFilterResult;
    iEvent.getByToken(HBHENoiseFilterResult_, HBHENoiseFilterResult);
    if (!*HBHENoiseFilterResult) return;
-   hCutFlow_->Fill("HBHENoiseFilter",1);
+   hCutFlow_->Fill("HBHENoiseFilter",mc_weight_*pu_weight_);
 
 
    // Get PV
@@ -328,7 +360,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } // photon loop
 
    if (vPhotons_.empty() || vPhotons_.at(0).p.Pt()<dPhoton_pT_cut_) return;
-   hCutFlow_->Fill("photons",1);
+   hCutFlow_->Fill("photons",mc_weight_*pu_weight_);
 
    // Muons
    edm::Handle<pat::MuonCollection> muonColl;
@@ -413,7 +445,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    double const HT=computeHT(vJets_);
    if (HT<dHT_cut_) return;
-   hCutFlow_->Fill("HT",1);
+   hCutFlow_->Fill("HT",mc_weight_*pu_weight_);
 
    // MET
    edm::Handle<pat::METCollection> metColl;
@@ -496,32 +528,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
    }
 
-   // PileUp weights
-   if (!isRealData){
-      edm::Handle<PileupSummaryInfoCollection>  PupInfo;
-      iEvent.getByToken(pileUpSummaryToken_, PupInfo);
-      float Tnpv = -1;
-      for( auto const& PVI: *PupInfo ) {
-         int BX = PVI.getBunchCrossing();
-         if(BX == 0) {
-            Tnpv = PVI.getTrueNumInteractions();
-            continue;
-         }
-      }
-      pu_weight_=hPU_.GetBinContent(hPU_.FindBin(Tnpv));
-   }else{ // real data
-      pu_weight_=1.;
-   }
-
-   // generator weights
-   mc_weight_=true; // 1 for data
-   if (!isRealData){
-      edm::Handle<GenEventInfoProduct> GenEventInfoHandle;
-      iEvent.getByLabel("generator", GenEventInfoHandle);
-      mc_weight_= GenEventInfoHandle->weight() >= 0;
-   }
-
-   hCutFlow_->Fill("final",1);
+   hCutFlow_->Fill("final",mc_weight_*pu_weight_);
    // store event identity
    evtNo_=iEvent.id().event();
    runNo_=iEvent.run();
