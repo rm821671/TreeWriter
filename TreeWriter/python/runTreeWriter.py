@@ -88,7 +88,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
                                     beamSpot = cms.InputTag('offlineBeamSpot'),
                                     conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
-                                    pileUpSummary = cms.InputTag('addPileupInfo'),
+                                    pileUpSummary = cms.InputTag('slimmedAddPileupInfo'),
                                     lheEventProduct = cms.InputTag('externalLHEProducer'),
                                     # electron IDs
                                     electronVetoIdMap   = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
