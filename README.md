@@ -12,7 +12,7 @@ git cms-merge-topic ikrav:egm_id_7.4.12_v1
 Get and build the TreeWriter
 
 ```
-git clone https://github.com/cms-susy-photon-rwth-1b/TreeWriter.git
+git clone git@github.com:cms-susy-photon-rwth-1b/TreeWriter.git
 scram b -j5
 cd TreeWriter
 ```
