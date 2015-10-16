@@ -10,7 +10,7 @@ options.register ('dataset',
                   "Name of the dataset, used to do further settings")
 
 # setup any defaults you want
-options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root'
+options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15MiniAODv2/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/00642A0F-AA6C-E511-BF83-0025905B85D0.root'
 
 
 options.outputFile = 'photonTree.root'
