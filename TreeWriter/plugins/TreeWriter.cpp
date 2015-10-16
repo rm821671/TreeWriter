@@ -383,7 +383,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if (!mu.isLooseMuon()) continue;
       trMuon.p.SetPtEtaPhi(mu.pt(),mu.eta(),mu.phi());
       trMuon.isTight=mu.isTightMuon(firstGoodVertex);
-      // trMuon.someTestFloat=mu.isLooseMuon();
       vMuons_.push_back(trMuon);
    } // muon loop
 
@@ -422,7 +421,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    for (const pat::Jet& jet : *jetColl){
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
       trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
-      trJet.someTestFloat=jet.chargedEmEnergyFraction();
       trJet.isLoose=isLooseJet(jet);
       // object matching
       trJet.hasPhotonMatch=false;
