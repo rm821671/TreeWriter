@@ -117,6 +117,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
    , HBHENoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHENoiseFilterResult")))
+   , hardPUveto_(iConfig.getUntrackedParameter<bool>("hardPUveto"))
    , triggerNames_(iConfig.getParameter<std::vector<std::string>>("triggerNames"))
 {
 

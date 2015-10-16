@@ -41,6 +41,7 @@ if re.match( "/.*/Run2015.*05Oct2015.*/MINIAOD", options.dataset ): gtName = "74
 if re.match( "/.*/.*RunIISpring15MiniAODv2.*/MINIAODSIM", options.dataset ): gtName = "74X_mcRun2_asymptotic_v2,frontier://FrontierArc/CMS_CONDITIONS_EJ06"
 process.GlobalTag = GlobalTag(process.GlobalTag, gtName, '')
 
+hardPUveto=True if options.dataset.startswith("/QCD_HT100to200") else False
 
 #
 # Define input data to read
@@ -107,6 +108,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
                                     HBHENoiseFilterResult = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
+                                    hardPUveto=cms.untracked.bool(hardPUveto),
                                     # triggers to be saved
                                     # Warning: To be independent of the version number, the trigger result is saved if the trigger name begins
                                     # with the strings given here. E.g. "HLT" would always be true if any of the triggers fired.
