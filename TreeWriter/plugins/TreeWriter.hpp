@@ -125,6 +125,7 @@ private:
 
    const std::string pileupHistogramName_;
    edm::EDGetTokenT<bool> HBHENoiseFilterResult_;
+   const bool hardPUveto_;
 
    // === TREE DATA ===
    TTree *eventTree_;
@@ -133,7 +134,7 @@ private:
    Float_t rho_;   // the rho variable
 
    Float_t pu_weight_; // pileup weight
-   Char_t mc_weight_; // True for positive event weights
+   Char_t mc_weight_; // +1 or -1 event weights (take care when reading with python, this is a character!)
 
    Float_t dummyFloat_=0.;
    Float_t dR_recoGenJet_=-1;
