@@ -503,7 +503,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                genHt_ += sqrt(pow(allParticles[i][0], 2) + pow(allParticles[i][1], 2));
             }
          } // end paricle loop
-      } // valid lhe
+      } else { // if no lheEventProduct is found
+        genHt_ = 0;
+        for (const auto& genP : *prunedGenParticles) {
+          auto absId = abs(genP.pdgId());
+          if (genP.status() == 23 and (absId<11 || absId > 16 ) && genP.pdgId() != 22 ) {
+            genHt_ += genP.pt();
+          }
+        } // genParticle loop
+      }
    }
 
 
