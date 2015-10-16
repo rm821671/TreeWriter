@@ -117,6 +117,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
    , HBHENoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHENoiseFilterResult")))
+   , hardPUveto_(iConfig.getUntrackedParameter<bool>("hardPUveto"))
    , triggerNames_(iConfig.getParameter<std::vector<std::string>>("triggerNames"))
 {
 
@@ -451,6 +452,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
         vGenJets_.push_back(trGJet);
      }
+   } // gen-jet loop
+
+   if (hardPUveto_){
+      for (tree::Jet const &j: vJets_){
+         if (j.isLoose){
+            if (j.p.Pt() > 300) return;
+            break; // only check first loose jet
+         }
+      }
    }
 
    double const HT=computeHT(vJets_);
