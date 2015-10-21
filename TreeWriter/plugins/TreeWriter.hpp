@@ -125,6 +125,7 @@ private:
 
    const std::string pileupHistogramName_;
    edm::EDGetTokenT<bool> HBHENoiseFilterResult_;
+   edm::EDGetTokenT<bool> HBHEIsoNoiseFilterResult_;
    const bool hardPUveto_;
 
    // === TREE DATA ===

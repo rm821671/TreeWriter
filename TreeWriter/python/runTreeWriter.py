@@ -109,6 +109,7 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     phoWorstChargedIsolation = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"),
                                     pileupHistogramName=cms.untracked.string( "pileupWeight_mix_2015_25ns_Startup_PoissonOOTPU" ),
                                     HBHENoiseFilterResult = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+                                    HBHEIsoNoiseFilterResult = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
                                     hardPUveto=cms.untracked.bool(hardPUveto),
                                     # triggers to be saved
                                     # Warning: To be independent of the version number, the trigger result is saved if the trigger name begins

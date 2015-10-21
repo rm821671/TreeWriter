@@ -117,6 +117,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
    , HBHENoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHENoiseFilterResult")))
+   , HBHEIsoNoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHEIsoNoiseFilterResult")))
    , hardPUveto_(iConfig.getUntrackedParameter<bool>("hardPUveto"))
    , triggerNames_(iConfig.getParameter<std::vector<std::string>>("triggerNames"))
 {
@@ -169,7 +170,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial_unweighted","initial_mc_weighted","initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
+   std::vector<TString> vCutBinNames{{"initial_unweighted","initial_mc_weighted","initial","METfilters","HBHENoiseFilter","HBHEIsoNoiseFilter","photons","HT","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -259,9 +260,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    hCutFlow_->Fill("METfilters",mc_weight_*pu_weight_);
    // this is manually re-run atm:
    edm::Handle<bool> HBHENoiseFilterResult;
+   edm::Handle<bool> HBHEIsoNoiseFilterResult;
    iEvent.getByToken(HBHENoiseFilterResult_, HBHENoiseFilterResult);
+   iEvent.getByToken(HBHEIsoNoiseFilterResult_, HBHEIsoNoiseFilterResult);
    if (!*HBHENoiseFilterResult) return;
    hCutFlow_->Fill("HBHENoiseFilter",mc_weight_*pu_weight_);
+   if (!*HBHEIsoNoiseFilterResult) return;
+   hCutFlow_->Fill("HBHEIsoNoiseFilter",mc_weight_*pu_weight_);
 
 
    // Get PV
