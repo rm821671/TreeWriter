@@ -57,7 +57,6 @@ process.source = cms.Source ("PoolSource",fileNames = cms.untracked.vstring(
 ###############################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2?rev=39
 applyMetFilters=cms.untracked.vstring(
-    "Flag_HBHENoiseFilter",
     "Flag_CSCTightHaloFilter",
     "Flag_goodVertices",
     "Flag_eeBadScFilter"
