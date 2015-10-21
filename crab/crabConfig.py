@@ -76,8 +76,9 @@ if __name__ == '__main__':
         isSim = 'SIM' in dataset
 
         if not isSim:
-            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.txt'
-
+            # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2522.html
+            # RunD: 1263.886 pb-1
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258750_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
         else:
             try: del config.Data.lumiMask
             except: pass
