@@ -62,11 +62,6 @@ datasets = [
     '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
 ]
 
-# temporary fix found here https://hypernews.cern.ch/HyperNews/CMS/get/crabFeedback/8195/1.html
-config.Data.ignoreLocality = True
-config.Site.whitelist = ["T2_CH_CERN"]
-
-
 # call with 'python crabConfig.py'
 if __name__ == '__main__':
     from CRABAPI.RawCommand import crabCommand
@@ -76,8 +71,9 @@ if __name__ == '__main__':
         isSim = 'SIM' in dataset
 
         if not isSim:
-            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v3.txt'
-
+            # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2522.html
+            # RunD: 1263.886 pb-1
+            config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-258750_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
         else:
             try: del config.Data.lumiMask
             except: pass
