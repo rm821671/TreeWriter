@@ -19,6 +19,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/VIDCutFlowResult.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -116,6 +117,7 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<float>> photonMvaValuesMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<vid::CutFlowResult>> phoLooseIdFullInfoMapToken_;
 
    // met filters to apply
    const std::vector<std::string> metFilterNames_;

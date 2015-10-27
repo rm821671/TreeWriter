@@ -52,25 +52,6 @@ template <typename T> int sign(T val) {
 // constants, enums and typedefs
 //
 
-// Effective areas for photons for spring15
-// https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#Selection_implementation_det_AN1?rev=15
-//
-namespace EffectiveAreas {
-   const int nEtaBins = 7;
-   const float etaBinLimits[nEtaBins+1] = {
-      0.0, 1.0, 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
-
-   const float areaPhotons[nEtaBins] = {
-      0.0725, 0.0604, 0.0320, 0.0512, 0.0766, 0.0949, 0.1160
-   };
-   const float areaNeutralHadrons[nEtaBins] = {
-      0.0143, 0.0210, 0.0147, 0.0082, 0.0124, 0.0186, 0.0320
-   };
-   const float areaChargedHadrons[nEtaBins] = {
-      0.0158, 0.0143, 0.0115, 0.0094, 0.0095, 0.0068, 0.0053
-   };
-}
-//
 
 double dR_leadingJet_gen_reco( const reco::GenJetCollection& genJets, const pat::JetCollection& recoJets ) {
     double dR = -1.;
@@ -112,6 +93,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonMediumIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
    , photonTightIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
    , photonMvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("photonMvaValuesMap")))
+   , phoLooseIdFullInfoMapToken_(consumes<edm::ValueMap<vid::CutFlowResult> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap" )))
    // met filters to apply
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
@@ -308,10 +290,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::ValueMap<bool> > medium_id_dec;
    edm::Handle<edm::ValueMap<bool> > tight_id_dec;
    edm::Handle<edm::ValueMap<float>> mva_value;
+   edm::Handle<edm::ValueMap<vid::CutFlowResult> > loose_id_cutflow;
    iEvent.getByToken(photonLooseIdMapToken_  ,loose_id_dec);
    iEvent.getByToken(photonMediumIdMapToken_ ,medium_id_dec);
    iEvent.getByToken(photonTightIdMapToken_  ,tight_id_dec);
    iEvent.getByToken(photonMvaValuesMapToken_,mva_value);
+   iEvent.getByToken(phoLooseIdFullInfoMapToken_,loose_id_cutflow);
 
    // photon collection
    edm::Handle<edm::View<pat::Photon> > photonColl;
@@ -334,24 +318,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.passElectronVeto= pho->passElectronVeto() ;
       trPho.r9  = pho->r9();
 
-      trPho.isoChargedHadronsEA=pho->chargedHadronIso();
-      trPho.isoNeutralHadronsEA=pho->neutralHadronIso();
-      trPho.isoPhotonsEA       =pho->photonIso();
-      trPho.isoWorstChargedHadrons = (*phoWorstChargedIsolationMap)[phoPtr];
-
-      // Compute isolation with effective area correction for PU
-      // Find eta bin first. If eta>2.5, the last eta bin is used.
-      int etaBin = 0;
-      while ( etaBin < EffectiveAreas::nEtaBins-1
-              && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
-         ++etaBin;
-      };
-      trPho.isoPhotonsEA        = std::max(float(0.0), trPho.isoPhotonsEA
-                                           - rho_ * EffectiveAreas::areaPhotons[etaBin] );
-      trPho.isoNeutralHadronsEA = std::max(float(0.0), trPho.isoNeutralHadronsEA
-                                           - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
-      trPho.isoChargedHadronsEA = std::max(float(0.0), trPho.isoChargedHadronsEA
-                                           - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
+      vid::CutFlowResult cutFlow = (*loose_id_cutflow)[phoPtr];
+      trPho.isoChargedHadronsEA = cutFlow.getValueCutUpon(4);
+      trPho.isoNeutralHadronsEA = cutFlow.getValueCutUpon(5);
+      trPho.isoPhotonsEA        = cutFlow.getValueCutUpon(6);
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
