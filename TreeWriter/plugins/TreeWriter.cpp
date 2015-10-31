@@ -71,7 +71,7 @@ double dR_leadingJet_gen_reco( const reco::GenJetCollection& genJets, const pat:
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    : dHT_cut_(iConfig.getUntrackedParameter<double>("HT_cut"))
    , dPhoton_pT_cut_(iConfig.getUntrackedParameter<double>("photon_pT_cut"))
-   , dR_leadingJet_gen_reco_cut_(iConfig.getUntrackedParameter<double>("dR_leadingJet_gen_reco_cut"))
+   , isolatedPhotons_(iConfig.getUntrackedParameter<bool>("isolatedPhoton"))
    , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
@@ -341,7 +341,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isTight = (*tight_id_dec) [phoPtr];
 
       // write the photon to collection
-      if (!trPho.isLoose) continue;
+      if (isolatedPhotons_ && !trPho.isLoose) continue;
       vPhotons_.push_back(trPho);
    } // photon loop
 
@@ -531,7 +531,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    dR_recoGenJet_ = -1;
-   if(!isRealData && dR_leadingJet_gen_reco_cut_ > 0 ) {
+   if(!isRealData ) {
       dR_recoGenJet_ = dR_leadingJet_gen_reco( *genJetColl, *jetColl );
    }
 

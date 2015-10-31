@@ -76,9 +76,9 @@ process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFil
 ################################
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
-                                    HT_cut=cms.untracked.double(0.),
-                                    photon_pT_cut=cms.untracked.double(20.),
-                                    dR_leadingJet_gen_reco_cut=cms.untracked.double(0.5), # not used yet
+                                    HT_cut=cms.untracked.double(500.),
+                                    photon_pT_cut=cms.untracked.double(90.),
+                                    isolatedPhotons=cms.untracked.bool(True),
                                     # physics objects
                                     photons = cms.InputTag("slimmedPhotons"),
                                     jets = cms.InputTag("slimmedJets"),
