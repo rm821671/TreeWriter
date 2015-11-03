@@ -90,8 +90,6 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     rho = cms.InputTag("fixedGridRhoFastjetAll"),
                                     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
-                                    beamSpot = cms.InputTag('offlineBeamSpot'),
-                                    conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
                                     pileUpSummary = cms.InputTag('slimmedAddPileupInfo'),
                                     lheEventProduct = cms.InputTag('externalLHEProducer'),
                                     # electron IDs
