@@ -71,7 +71,7 @@ double dR_leadingJet_gen_reco( const reco::GenJetCollection& genJets, const pat:
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    : dHT_cut_(iConfig.getUntrackedParameter<double>("HT_cut"))
    , dPhoton_pT_cut_(iConfig.getUntrackedParameter<double>("photon_pT_cut"))
-   , isolatedPhotons_(iConfig.getUntrackedParameter<bool>("isolatedPhoton"))
+   , isolatedPhotons_(iConfig.getUntrackedParameter<bool>("isolatedPhotons"))
    , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
