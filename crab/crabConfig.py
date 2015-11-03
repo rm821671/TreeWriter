@@ -33,6 +33,7 @@ datasets = [
     '/SinglePhoton/Run2015D-05Oct2015-v1/MINIAOD',
     '/MET/Run2015D-05Oct2015-v1/MINIAOD',
     '/JetHT/Run2015D-05Oct2015-v1/MINIAOD',
+    '/SingleMuon/Run2015D-05Oct2015-v1/MINIAOD',
     '/GJet_Pt-15ToInf_TuneCUETP8M1_13TeV-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',
     '/GJets_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',
     '/GJets_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',
