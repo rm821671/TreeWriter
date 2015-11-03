@@ -128,7 +128,13 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                         "HLT_Photon50_v",
                                         "HLT_Photon165_R9Id90_HE10_IsoM_v",
                                         "HLT_Photon36_R9Id90_HE10_IsoM_v",
-                                        "HLT_PFMET170_v"
+                                        "HLT_Photon135_PFMET100_v",
+                                        "HLT_Photon500_v",
+                                        "HLT_PFMET170_v",
+                                        "HLT_IsoMu18_v",
+                                        "HLT_IsoMu20_v",
+                                        "HLT_Mu20_v",
+                                        "HLT_Mu50_v",
                                     )
 )
 
