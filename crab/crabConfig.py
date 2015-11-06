@@ -75,7 +75,20 @@ datasets = [
 
 # call with 'python crabConfig.py'
 if __name__ == '__main__':
+    import getpass
     from CRABAPI.RawCommand import crabCommand
+
+    user=getpass.getuser()
+    if user=="kiesel":
+        config.Data.publishDataName = 'V04'
+        config.Data.outLFNDirBase = "/store/user/kiesel/13TeV/nTuples/"
+    elif user=="lange":
+        config.Data.publishDataName = 'v02'
+        config.Data.outLFNDirBase = "/store/user/jolange/run2/"
+    else:
+        print "you shall not pass!"
+        print "(unkown user '%s')"%user
+        exit()
 
     for dataset in datasets:
 
@@ -94,7 +107,7 @@ if __name__ == '__main__':
         else:
             config.General.requestName = '_'.join(dataset.split('/')[1:3])
 
-        config.JobType.pyCfgParams = [ "dataset="+dataset ]
+        config.JobType.pyCfgParams = [ "dataset="+dataset, "user="+user]
 
         config.Data.inputDataset = dataset
         crabCommand('submit', config = config)
