@@ -137,6 +137,11 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     )
 )
 
+if re.match( "/SMS-.*/.*/USER", options.dataset ):
+    # signal scan
+    process.TreeWriter.metFilterNames = [] # no met filters for fastsim
+    process.TreeWriter.pileUpSummary = "addPileupInfo" # for miniaod v1
+
 process.TFileService = cms.Service("TFileService",fileName = cms.string(options.outputFile))
 
 
