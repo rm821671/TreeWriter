@@ -8,6 +8,34 @@ options.register ('dataset',
                   VarParsing.multiplicity.singleton,
                   VarParsing.varType.string,
                   "Name of the dataset, used to do further settings")
+options.register ('user',
+                  '',
+                  VarParsing.multiplicity.singleton,
+                  VarParsing.varType.string,
+                  "Name the user. If not set by crab, this script will determine it.")
+# get and parse the command line arguments
+options.parseArguments()
+
+# determine user if not set by crab
+user={}
+if not options.user:
+    import getpass
+    user["name"]=getpass.getuser()
+else:
+    user["name"]=options.user
+# user settings
+if user["name"]=="kiesel":
+    user["HT_cut"]=500.
+    user["photon_pT_cut"]=90.
+    user["isolatedPhotons"]=False
+elif user["name"]=="lange":
+    user["HT_cut"]=0.
+    user["photon_pT_cut"]=20.
+    user["isolatedPhotons"]=True
+else:
+    print "you shall not pass!"
+    print "(unkown user '%s')"%options.user
+    exit()
 
 # setup any defaults you want
 options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15MiniAODv2/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/00642A0F-AA6C-E511-BF83-0025905B85D0.root'
@@ -15,9 +43,6 @@ options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15MiniAODv2/QCD
 
 options.outputFile = 'photonTree.root'
 options.maxEvents = -1
-
-# get and parse the command line arguments
-options.parseArguments()
 
 # determine if Data or Simulation
 isRealData=(not options.dataset.endswith("SIM"))
@@ -77,9 +102,9 @@ process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFil
 ################################
 process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     # selection configuration
-                                    HT_cut=cms.untracked.double(500.),
-                                    photon_pT_cut=cms.untracked.double(90.),
-                                    isolatedPhotons=cms.untracked.bool(True),
+                                    HT_cut=cms.untracked.double(user["HT_cut"]),
+                                    photon_pT_cut=cms.untracked.double(user["photon_pT_cut"]),
+                                    isolatedPhotons=cms.untracked.bool(user["isolatedPhotons"]),
                                     # physics objects
                                     photons = cms.InputTag("slimmedPhotons"),
                                     jets = cms.InputTag("slimmedJets"),
