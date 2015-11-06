@@ -1,6 +1,10 @@
 #!/usr/bin/env python2
 from WMCore.Configuration import Configuration
 import os
+import subprocess
+
+def searchUserDatasets( name ):
+    return subprocess.check_output( 'das_client.py --limit=0 --query="dataset={} instance=prod/phys03"'.format(name), shell=True ).split("\n")[0:-1]
 
 cmssw_src=os.environ['CMSSW_BASE']+'/src/'
 
@@ -78,6 +82,8 @@ datasets["lange"] = [
     '/MET/Run2015D-PromptReco-v4/MINIAOD',
     '/SingleMuon/Run2015D-PromptReco-v4/MINIAOD',
 ]
+
+datasets["SMS-T5gg-private"] = searchUserDatasets( "/SMS-T5gg/kiesel-*/USER" )
 
 
 # call with 'python crabConfig.py'
