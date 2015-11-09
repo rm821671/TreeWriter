@@ -52,25 +52,6 @@ template <typename T> int sign(T val) {
 // constants, enums and typedefs
 //
 
-// Effective areas for photons for spring15
-// https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#Selection_implementation_det_AN1?rev=15
-//
-namespace EffectiveAreas {
-   const int nEtaBins = 7;
-   const float etaBinLimits[nEtaBins+1] = {
-      0.0, 1.0, 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
-
-   const float areaPhotons[nEtaBins] = {
-      0.0725, 0.0604, 0.0320, 0.0512, 0.0766, 0.0949, 0.1160
-   };
-   const float areaNeutralHadrons[nEtaBins] = {
-      0.0143, 0.0210, 0.0147, 0.0082, 0.0124, 0.0186, 0.0320
-   };
-   const float areaChargedHadrons[nEtaBins] = {
-      0.0158, 0.0143, 0.0115, 0.0094, 0.0095, 0.0068, 0.0053
-   };
-}
-//
 
 double dR_leadingJet_gen_reco( const reco::GenJetCollection& genJets, const pat::JetCollection& recoJets ) {
     double dR = -1.;
@@ -90,7 +71,7 @@ double dR_leadingJet_gen_reco( const reco::GenJetCollection& genJets, const pat:
 TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    : dHT_cut_(iConfig.getUntrackedParameter<double>("HT_cut"))
    , dPhoton_pT_cut_(iConfig.getUntrackedParameter<double>("photon_pT_cut"))
-   , dR_leadingJet_gen_reco_cut_(iConfig.getUntrackedParameter<double>("dR_leadingJet_gen_reco_cut"))
+   , isolatedPhotons_(iConfig.getUntrackedParameter<bool>("isolatedPhotons"))
    , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
    // packed particle flow candidates
    , packedCandidateToken_   (consumes<PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("packedCandidates")))
@@ -115,11 +96,14 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , photonMediumIdMapToken_ (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonMediumIdMap" )))
    , photonTightIdMapToken_  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("photonTightIdMap"  )))
    , photonMvaValuesMapToken_(consumes<edm::ValueMap<float>>(iConfig.getParameter<edm::InputTag>("photonMvaValuesMap")))
+   , phoLooseIdFullInfoMapToken_(consumes<edm::ValueMap<vid::CutFlowResult> >(iConfig.getParameter<edm::InputTag>("photonLooseIdMap" )))
    // met filters to apply
    , metFilterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("metFilterNames"))
    , phoWorstChargedIsolationToken_(consumes <edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("phoWorstChargedIsolation")))
    , pileupHistogramName_(iConfig.getUntrackedParameter<std::string>("pileupHistogramName"))
    , HBHENoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHENoiseFilterResult")))
+   , HBHEIsoNoiseFilterResult_(consumes<bool> (iConfig.getParameter<edm::InputTag>("HBHEIsoNoiseFilterResult")))
+   , hardPUveto_(iConfig.getUntrackedParameter<bool>("hardPUveto"))
    , triggerNames_(iConfig.getParameter<std::vector<std::string>>("triggerNames"))
 {
 
@@ -176,7 +160,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    puFile.Close();
 
    // create cut-flow histogram
-   std::vector<TString> vCutBinNames{{"initial_unweighted","initial_mc_weighted","initial","METfilters","HBHENoiseFilter","photons","HT","final"}};
+   std::vector<TString> vCutBinNames{{"initial_unweighted","initial_mc_weighted","initial","METfilters","HBHENoiseFilter","HBHEIsoNoiseFilter","photons","HT","final"}};
    hCutFlow_ = fs->make<TH1F>("hCutFlow","hCutFlow",vCutBinNames.size(),0,vCutBinNames.size());
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
@@ -265,9 +249,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    hCutFlow_->Fill("METfilters",mc_weight_*pu_weight_);
    // this is manually re-run atm:
    edm::Handle<bool> HBHENoiseFilterResult;
+   edm::Handle<bool> HBHEIsoNoiseFilterResult;
    iEvent.getByToken(HBHENoiseFilterResult_, HBHENoiseFilterResult);
+   iEvent.getByToken(HBHEIsoNoiseFilterResult_, HBHEIsoNoiseFilterResult);
    if (!*HBHENoiseFilterResult) return;
    hCutFlow_->Fill("HBHENoiseFilter",mc_weight_*pu_weight_);
+   if (!*HBHEIsoNoiseFilterResult) return;
+   hCutFlow_->Fill("HBHEIsoNoiseFilter",mc_weight_*pu_weight_);
 
 
    // Get PV
@@ -362,10 +350,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::ValueMap<bool> > medium_id_dec;
    edm::Handle<edm::ValueMap<bool> > tight_id_dec;
    edm::Handle<edm::ValueMap<float>> mva_value;
+   edm::Handle<edm::ValueMap<vid::CutFlowResult> > loose_id_cutflow;
    iEvent.getByToken(photonLooseIdMapToken_  ,loose_id_dec);
    iEvent.getByToken(photonMediumIdMapToken_ ,medium_id_dec);
    iEvent.getByToken(photonTightIdMapToken_  ,tight_id_dec);
    iEvent.getByToken(photonMvaValuesMapToken_,mva_value);
+   iEvent.getByToken(phoLooseIdFullInfoMapToken_,loose_id_cutflow);
 
    // photon collection
    edm::Handle<edm::View<pat::Photon> > photonColl;
@@ -388,24 +378,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.passElectronVeto= pho->passElectronVeto() ;
       trPho.r9  = pho->r9();
 
-      trPho.isoChargedHadronsEA=pho->chargedHadronIso();
-      trPho.isoNeutralHadronsEA=pho->neutralHadronIso();
-      trPho.isoPhotonsEA       =pho->photonIso();
-      trPho.isoWorstChargedHadrons = (*phoWorstChargedIsolationMap)[phoPtr];
-
-      // Compute isolation with effective area correction for PU
-      // Find eta bin first. If eta>2.5, the last eta bin is used.
-      int etaBin = 0;
-      while ( etaBin < EffectiveAreas::nEtaBins-1
-              && abs( pho->superCluster()->eta() ) > EffectiveAreas::etaBinLimits[etaBin+1] ){
-         ++etaBin;
-      };
-      trPho.isoPhotonsEA        = std::max(float(0.0), trPho.isoPhotonsEA
-                                           - rho_ * EffectiveAreas::areaPhotons[etaBin] );
-      trPho.isoNeutralHadronsEA = std::max(float(0.0), trPho.isoNeutralHadronsEA
-                                           - rho_ * EffectiveAreas::areaNeutralHadrons[etaBin] );
-      trPho.isoChargedHadronsEA = std::max(float(0.0), trPho.isoChargedHadronsEA
-                                           - rho_ * EffectiveAreas::areaChargedHadrons[etaBin] );
+      vid::CutFlowResult cutFlow = (*loose_id_cutflow)[phoPtr];
+      trPho.isoChargedHadronsEA = cutFlow.getValueCutUpon(4);
+      trPho.isoNeutralHadronsEA = cutFlow.getValueCutUpon(5);
+      trPho.isoPhotonsEA        = cutFlow.getValueCutUpon(6);
 
       trPho.mvaValue=(*mva_value)[phoPtr];
 
@@ -425,7 +401,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       trPho.isTight = (*tight_id_dec) [phoPtr];
 
       // write the photon to collection
-      if (!trPho.isLoose) continue;
+      if (isolatedPhotons_ && !trPho.isLoose) continue;
       vPhotons_.push_back(trPho);
    } // photon loop
 
@@ -442,7 +418,6 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if (!mu.isLooseMuon()) continue;
       trMuon.p.SetPtEtaPhi(mu.pt(),mu.eta(),mu.phi());
       trMuon.isTight=mu.isTightMuon(firstGoodVertex);
-      // trMuon.someTestFloat=mu.isLooseMuon();
       vMuons_.push_back(trMuon);
    } // muon loop
 
@@ -479,9 +454,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    vJets_.clear();
    tree::Jet trJet;
    for (const pat::Jet& jet : *jetColl){
+      if (jet.pt()<30) continue;
       trJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
       trJet.bDiscriminator=jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
-      trJet.someTestFloat=jet.chargedEmEnergyFraction();
       trJet.isLoose=isLooseJet(jet);
       // object matching
       trJet.hasPhotonMatch=false;
@@ -511,6 +486,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         trGJet.p.SetPtEtaPhi(jet.pt(),jet.eta(),jet.phi());
         vGenJets_.push_back(trGJet);
      }
+   } // gen-jet loop
+
+   if (hardPUveto_){
+      for (tree::Jet const &j: vJets_){
+         if (j.isLoose){
+            if (j.p.Pt() > 300) return;
+            break; // only check first loose jet
+         }
+      }
    }
 
    double const HT=computeHT(vJets_);
@@ -563,7 +547,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                genHt_ += sqrt(pow(allParticles[i][0], 2) + pow(allParticles[i][1], 2));
             }
          } // end paricle loop
-      } // valid lhe
+      } else { // if no lheEventProduct is found
+        genHt_ = 0;
+        for (const auto& genP : *prunedGenParticles) {
+          auto absId = abs(genP.pdgId());
+          if (genP.status() == 23 and (absId<11 || absId > 16 ) && genP.pdgId() != 22 ) {
+            genHt_ += genP.pt();
+          }
+        } // genParticle loop
+      }
    }
 
 
@@ -599,7 +591,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    dR_recoGenJet_ = -1;
-   if(!isRealData && dR_leadingJet_gen_reco_cut_ > 0 ) {
+   if(!isRealData ) {
       dR_recoGenJet_ = dR_leadingJet_gen_reco( *genJetColl, *jetColl );
    }
 

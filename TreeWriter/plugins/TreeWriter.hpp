@@ -19,6 +19,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/VIDCutFlowResult.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -93,7 +94,7 @@ private:
    // ----------member data ---------------------------
    double dHT_cut_;
    double dPhoton_pT_cut_;
-   double dR_leadingJet_gen_reco_cut_;
+   bool isolatedPhotons_;
 
    edm::EDGetTokenT<reco::VertexCollection>    vtxToken_;
    edm::EDGetTokenT<PackedCandidateCollection>      packedCandidateToken_;
@@ -120,6 +121,7 @@ private:
    edm::EDGetTokenT<edm::ValueMap<bool> > photonMediumIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<bool> > photonTightIdMapToken_;
    edm::EDGetTokenT<edm::ValueMap<float>> photonMvaValuesMapToken_;
+   edm::EDGetTokenT<edm::ValueMap<vid::CutFlowResult>> phoLooseIdFullInfoMapToken_;
 
    // met filters to apply
    const std::vector<std::string> metFilterNames_;
@@ -129,6 +131,8 @@ private:
 
    const std::string pileupHistogramName_;
    edm::EDGetTokenT<bool> HBHENoiseFilterResult_;
+   edm::EDGetTokenT<bool> HBHEIsoNoiseFilterResult_;
+   const bool hardPUveto_;
 
    // === TREE DATA ===
    TTree *eventTree_;
@@ -139,7 +143,7 @@ private:
    Float_t rho_;   // the rho variable
 
    Float_t pu_weight_; // pileup weight
-   Char_t mc_weight_; // True for positive event weights
+   Char_t mc_weight_; // +1 or -1 event weights (take care when reading with python, this is a character!)
 
    Float_t dummyFloat_=0.;
    Float_t dR_recoGenJet_=-1;
