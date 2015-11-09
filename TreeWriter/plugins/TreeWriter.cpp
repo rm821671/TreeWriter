@@ -92,6 +92,9 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    , dPhoton_pT_cut_(iConfig.getUntrackedParameter<double>("photon_pT_cut"))
    , dR_leadingJet_gen_reco_cut_(iConfig.getUntrackedParameter<double>("dR_leadingJet_gen_reco_cut"))
    , vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices")))
+   // packed particle flow candidates
+   , packedCandidateToken_   (consumes<PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("packedCandidates")))
+   /* --- */
    , photonCollectionToken_  (consumes<edm::View<pat::Photon> >(iConfig.getParameter<edm::InputTag>("photons")))
    , jetCollectionToken_     (consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets")))
    , genJetCollectionToken_  (consumes<reco::GenJetCollection>(iConfig.getParameter<edm::InputTag>("genJets")))
@@ -130,7 +133,13 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("muons"    , &vMuons_);
    eventTree_->Branch("met"      , &met_);
    eventTree_->Branch("genParticles", &vGenParticles_);
-
+   
+   // unpacked pf candidates; see tree::PFCandidate
+   eventTree_->Branch("PFCandidates", &vUnpackedPFCandidates_);
+      
+   // number of charged pf candidates
+   eventTree_->Branch("nChargedPfCandidates" , &nChargedPfCandidates_ , "nChargedPfCandidates/I");
+   
    eventTree_->Branch("nGoodVertices" , &nGoodVertices_ , "nGoodVertices/I");
    eventTree_->Branch("rho"           , &rho_           , "rho/F");
 
@@ -141,7 +150,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    eventTree_->Branch("dR_recoGenJet" , &dR_recoGenJet_ , "dR_recoGenJet/F");
    eventTree_->Branch("genLeptonsFromW" , &genLeptonsFromW_ , "genLeptonsFromW/I");
    eventTree_->Branch("genHt" , &genHt_ , "genHt/F");
-
+   
    eventTree_->Branch("evtNo", &evtNo_, "evtNo/l");
    eventTree_->Branch("runNo", &runNo_, "runNo/i");
    eventTree_->Branch("lumNo", &lumNo_, "lumNo/i");
@@ -152,8 +161,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
       triggerDecision_[n] = false;
       eventTree_->Branch( n.c_str(), &triggerDecision_[n], (n+"/O").c_str() );
    }
-
-
+   
 
    // get pileup histogram(s)
    std::string cmssw_base_src = getenv("CMSSW_BASE");
@@ -173,7 +181,6 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    for (uint i=0;i<vCutBinNames.size();i++) hCutFlow_->GetXaxis()->SetBinLabel(i+1,vCutBinNames.at(i));
 }
 
-
 TreeWriter::~TreeWriter(){}
 
 //
@@ -189,7 +196,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    isRealData=iEvent.isRealData();
 
    // PileUp weights
-   if (!isRealData){
+   if (1==0){	// no pileUpSummary for this dataset
       edm::Handle<PileupSummaryInfoCollection>  PupInfo;
       iEvent.getByToken(pileUpSummaryToken_, PupInfo);
       float Tnpv = -1;
@@ -283,7 +290,60 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          if (nGoodVertices_==1) firstGoodVertex = vtx;
       }
    }
+   
+   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   // count number of charged pf candidates:
+   
+   // eventTree_->Branch("nChargedPfCandidates" , &nChargedPfCandidates_ , "nChargedPfCandidates/I");
+   vPackedPFCandidates_.clear();
+   vUnpackedPFCandidates_.clear();
+   
+   tree::PFCandidate trPFCand;
+   nChargedPfCandidates_ = 0;
 
+   
+   //edm::Ref<reco::VertexCollection> pvRef;	// vertex reference
+   edm::Handle<PackedCandidateCollection> packedCandidateColl;
+   iEvent.getByToken(packedCandidateToken_, packedCandidateColl);
+   
+   for(auto const& pc : *packedCandidateColl){
+   	vPackedPFCandidates_.push_back(pc);
+   	
+   	if(pc.pt() > 0.95 && pc.charge() != 0){	// errors only stored for pf with these conditions
+	   	
+	   	trPFCand.p.SetXYZ(pc.px(),pc.py(),pc.pz());
+	   	trPFCand.pdgId = pc.pdgId();
+	   	trPFCand.charge = pc.charge();
+	   	trPFCand.pvAssociationQuality = pc.pvAssociationQuality();
+	   	
+	/*
+		   	// check if pdgId and charge match 
+	   	if( 	
+	   		(pc.pdgId() ==  11 && pc.charge() == -1) || 
+	   		(pc.pdgId() == -11 && pc.charge() ==  1)
+	   	  ){
+	   		trPFCand.IdChargeMatch = 1; // electron e=-1 or positron e=+1, match
+	   	}
+	   	else if(
+	   		(pc.pdgId() ==  211 && pc.charge() ==  1) ||
+	   		(pc.pdgId() == -211 && pc.charge() == -1)
+	   	  ){   		
+	   		trPFCand.IdChargeMatch = 2; // pi+ e=1 or pi- e=-1, match
+	   	}
+	   	else{
+	   		trPFCand.IdChargeMatch = 0; // no match
+	   	}
+	*/
+	   	
+	   	vUnpackedPFCandidates_.push_back(trPFCand);
+	   	nChargedPfCandidates_++;
+	   	
+   	}
+   	
+   	//pvRef = pc.vertexRef(); // vertex reference
+   		
+   }
+   
    // Get rho
    edm::Handle< double > rhoH;
    iEvent.getByToken(rhoToken_,rhoH);
