@@ -26,7 +26,7 @@ config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 500
 config.Data.publication = False
 # This string is used to construct the output dataset name
-config.Data.publishDataName = 'V04'
+config.Data.outputDatasetTag = 'V04'
 config.Data.outLFNDirBase = "/store/user/kiesel/13TeV/nTuples/"
 
 config.section_("Site")
