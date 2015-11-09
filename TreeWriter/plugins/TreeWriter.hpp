@@ -53,7 +53,8 @@
 #include "TreeParticles.hpp"
 
 typedef std::vector<PileupSummaryInfo> PileupSummaryInfoCollection;
-
+typedef std::vector<pat::PackedCandidate> PackedCandidateCollection;
+typedef std::vector<tree::PFCandidate> PFCandidateCollection;
 
 //
 // class declaration
@@ -95,6 +96,9 @@ private:
    double dR_leadingJet_gen_reco_cut_;
 
    edm::EDGetTokenT<reco::VertexCollection>    vtxToken_;
+   edm::EDGetTokenT<PackedCandidateCollection>      packedCandidateToken_;
+//   packedCandidateToken_   (consumes<pat::PackedCandidate>(iConfig.getParameter<edm::InputTag>("packedPFCandidates")))
+   
    edm::EDGetTokenT<edm::View<pat::Photon> >   photonCollectionToken_;
    edm::EDGetTokenT<pat::JetCollection>        jetCollectionToken_;
    edm::EDGetTokenT<reco::GenJetCollection>    genJetCollectionToken_;
@@ -130,6 +134,8 @@ private:
    TTree *eventTree_;
 
    Int_t   nGoodVertices_;
+   Int_t   nChargedPfCandidates_;
+   
    Float_t rho_;   // the rho variable
 
    Float_t pu_weight_; // pileup weight
@@ -151,6 +157,11 @@ private:
    std::map<std::string, int > triggerIndex_;
 
    // physics Objects
+
+   PFCandidateCollection vUnpackedPFCandidates_;
+   
+   PackedCandidateCollection vPackedPFCandidates_;
+   
    std::vector<tree::Photon>   vPhotons_;
    std::vector<tree::Jet>      vJets_;
    std::vector<tree::Particle> vGenJets_;
