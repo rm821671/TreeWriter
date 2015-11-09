@@ -65,6 +65,31 @@ namespace tree
       TVector3 p_raw;
       Float_t  uncertainty;
    };
+   
+   struct PFCandidate : public Particle
+   {
+      Int_t pdgId=0;      
+      Int_t charge;
+      
+      // 0: no match
+      // 1: electron/positron id-charge match
+      // 2: pi+/pi- id-charge match
+      //Int_t IdChargeMatch;
+      
+      // primary vertex information
+      //
+      // enum PVAssociationQuality {
+      // 	NotReconstructedPrimary=0,
+      // 	OtherDeltaZ=1,
+      // 	CompatibilityBTag=4,
+      // 	CompatibilityDz=5,
+      // 	UsedInFitLoose=6,
+      // 	UsedInFitTight=7	
+      // };
+      Int_t pvAssociationQuality;
+      
+      
+   };
 
    inline bool EtGreater(const tree::Particle p1, const tree::Particle p2) {
       return p1.p.Pt() > p2.p.Pt();
