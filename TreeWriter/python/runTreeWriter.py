@@ -32,6 +32,10 @@ elif user["name"]=="lange":
     user["HT_cut"]=0.
     user["photon_pT_cut"]=20.
     user["isolatedPhotons"]=True
+elif user["name"]=="rmeyer":
+    user["HT_cut"]=0.
+    user["photon_pT_cut"]=20.
+    user["isolatedPhotons"]=True
 else:
     print "you shall not pass!"
     print "(unkown user '%s')"%options.user
