@@ -10,10 +10,12 @@
 #pragma link C++ class tree::Electron+;
 #pragma link C++ class tree::MET+;
 #pragma link C++ class tree::GenParticle+;
+#pragma link C++ class tree::PFCandidate+;
 #pragma link C++ class std::vector<tree::Photon>+;
 #pragma link C++ class std::vector<tree::Particle>+;
 #pragma link C++ class std::vector<tree::Jet>+;
 #pragma link C++ class std::vector<tree::Muon>+;
 #pragma link C++ class std::vector<tree::Electron>+;
 #pragma link C++ class std::vector<tree::GenParticle>+;
+#pragma link C++ class std::vector<tree::PFCandidate>+;
 #endif
