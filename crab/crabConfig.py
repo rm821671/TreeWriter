@@ -30,7 +30,7 @@ config.section_("Site")
 config.Site.storageSite = 'T2_DE_RWTH'
 
 datasets = [
-    '/SinglePhoton/Run2015D-05Oct2015-v1/MINIAOD',
+"""    '/SinglePhoton/Run2015D-05Oct2015-v1/MINIAOD',
     '/MET/Run2015D-05Oct2015-v1/MINIAOD',
     #'/JetHT/Run2015D-PromptReco-v3/MINIAOD',
     '/GJets_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',
@@ -55,7 +55,7 @@ datasets = [
     #'/WJetsToLNu_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM', # alternative?
     '/WGToLNuG_PtG-500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',
     # WG unbinned in pt or other bins
-    '/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',
+    '/TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM',"""
     '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
 ]
 
