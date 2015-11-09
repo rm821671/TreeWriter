@@ -2,6 +2,9 @@ import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 import re
 
+import datetime
+import calendar
+
 options = VarParsing ('analysis')
 options.register ('dataset',
                   '',
@@ -10,10 +13,13 @@ options.register ('dataset',
                   "Name of the dataset, used to do further settings")
 
 # setup any defaults you want
-options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root'
+#options.inputFiles = 'root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/027A951D-4103-E511-8B6B-A0040420FE80.root'
+options.inputFiles = "file:/home/home4/institut_1b/rmeyer/cms_sw/MiniAOD/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/00759690-D16E-E511-B29E-00261894382D.root"
 
+timestamp = str(calendar.timegm(datetime.datetime.utcnow().timetuple()))
+filename = '/home/home4/institut_1b/rmeyer/cms_sw/myTrees/mcDY_' + timestamp + '.root'
 
-options.outputFile = 'photonTree.root'
+options.outputFile = filename
 options.maxEvents = -1
 
 # get and parse the command line arguments
@@ -85,6 +91,8 @@ process.TreeWriter = cms.EDAnalyzer('TreeWriter',
                                     electrons = cms.InputTag("slimmedElectrons"),
                                     mets = cms.InputTag("slimmedMETs"),
                                     rho = cms.InputTag("fixedGridRhoFastjetAll"),
+                                    	# packed pf candidates
+                                    packedCandidates = cms.InputTag("packedPFCandidates"),
                                     vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                     prunedGenParticles = cms.InputTag("prunedGenParticles"),
                                     beamSpot = cms.InputTag('offlineBeamSpot'),
